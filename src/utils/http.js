@@ -1,7 +1,10 @@
 import axios from 'axios'
 import router from '../router/index'
 import store from '../store/index'
-import { saveToLocal, loadFromLocal } from '@/common/local-storage'
+import {
+  saveToLocal,
+  loadFromLocal
+} from '@/common/local-storage'
 import base from '@/api/base'
 import qs from 'qs'
 
@@ -69,8 +72,8 @@ const errorHandle = (status, other) => {
       console.log('401')
       toLogin()
       break
-    // 403 token过期
-    // 清除token并跳转登录页
+      // 403 token过期
+      // 清除token并跳转登录页
     case 403:
       // tip('登录过期，请重新登录')
       // todo: refresh_token
@@ -81,7 +84,7 @@ const errorHandle = (status, other) => {
         toLogin()
       }, 1000)
       break
-    // 404请求不存在
+      // 404请求不存在
     case 404:
       // tip('请求的资源不存在')
       break
@@ -91,11 +94,15 @@ const errorHandle = (status, other) => {
 }
 
 // 创建axios实例
-var instance = axios.create({ timeout: 1000 * 12 })
+var instance = axios.create({
+  timeout: 1000 * 12
+})
 // 设置post请求头
-instance.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
-instance.defaults.headers.common['Access-Control-Allow-Origin'] = '*'
+instance.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded' // 默认请求头
 
+instance.defaults.headers.common['Access-Control-Allow-Origin'] = '*' // 表示允许网站接收服务器返回的资源
+
+// 猜测是否失效
 function isTokenExpired() {
   let expiredIn = loadFromLocal('expires_in')
   let tokenCreatedTime = loadFromLocal('created_time')
@@ -112,6 +119,7 @@ function isTokenExpired() {
  * 每次请求前，如果存在token则在请求头中携带token
  */
 instance.interceptors.request.use(
+
   config => {
     // 登录流程控制中，根据本地是否存在token判断用户的登录情况
     // 但是即使token存在，也有可能token是过期的，所以在每次的请求头中携带token
@@ -126,7 +134,9 @@ instance.interceptors.request.use(
       const refreshToken = loadFromLocal('refresh_token')
       const username = loadFromLocal('username')
       const password = loadFromLocal('password')
+      // token 有没有过期
       if (isTokenExpired()) {
+        // 刷新 token
         if (!window.isRefreshing) {
           window.isRefreshing = true
           var params = {
@@ -148,13 +158,14 @@ instance.interceptors.request.use(
                 directLogin()
               }
             })
-          .catch(() => {
-            window.isRefreshing = false
-            subscribesArr = []
-            window.localStorage.clear()
-            directLogin()
-          })
+            .catch(() => {
+              window.isRefreshing = false
+              subscribesArr = []
+              window.localStorage.clear()
+              directLogin()
+            })
         }
+        // 用新的token 去请求数据
         let retry = new Promise((resolve, reject) => {
           subscribeTokenRefresh((newToken) => {
             config.headers.Authorization = `Bearer ${newToken}`
@@ -180,7 +191,9 @@ instance.interceptors.response.use(
   res => res.status === 200 ? Promise.resolve(res) : Promise.reject(res),
   // 请求失败
   error => {
-    const { response } = error
+    const {
+      response
+    } = error
     if (response) {
       // 请求已发出，但是不在2xx的范围
       errorHandle(response.status, response.data.message)
