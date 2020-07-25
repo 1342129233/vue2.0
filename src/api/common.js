@@ -62,3 +62,15 @@ export function cuDeptTemplateRequest(data) {
     data
   })
 }
+
+// 人员管理的部门工种岗位列表
+export function ryglbgg() {
+  let data = {
+    k: ['dept', 'occ', 'pro']
+  }
+  return axios.request({
+    url: `/${_api}/baseData/getBaseData`,
+    method: 'POST',
+    data
+  })
+}

@@ -1,11 +1,16 @@
-import {getDepartmentListRequest, addDepartmentRequest, reviseDepartmentInfoRequest, deleteDepartmentRequest, setProOccRequest} from '@/api/department'
+import {getDepartmentListRequest, addDepartmentRequest, reviseDepartmentInfoRequest, deleteDepartmentRequest, setProOccRequest, setEmployeelistRequest, addStaffRequest} from '@/api/department'
 const department = {
   state: {
-    departmentList: []
+    departmentList: [],
+    employeeList: []
   },
   mutations: {
     SAVE_DEPARTMENTLIST(state, departmentList) {
       state.departmentList = departmentList
+    },
+    SAVE_SETEMPLOYEE(state, employeeList) {
+      // console.log(employeeList.data)
+      state.employeeList = employeeList.data
     }
   },
   actions: {
@@ -57,6 +62,29 @@ const department = {
       return new Promise((resolve, reject) => {
         setProOccRequest(setProOccParams).then(({data}) => {
           return resolve(data)
+        }).catch(err => {
+          return reject(err)
+        })
+      })
+    },
+    // 获取员工信息
+    setEmployeelist({commit}, num) {
+      return new Promise((resolve, reject) => {
+        setEmployeelistRequest(num).then(({data}) => {
+          commit('SAVE_SETEMPLOYEE', data.data)
+          return resolve(data)
+        }).catch(err => {
+          return reject(err)
+        })
+      })
+    },
+    // 添加员工
+    addStaff(_, personCre) {
+      return new Promise((resolve, reject) => {
+        addStaffRequest(personCre).then(({data}) => {
+          return resolve(data)
+        }).then(err => {
+          return reject(err)
         }).catch(err => {
           return reject(err)
         })

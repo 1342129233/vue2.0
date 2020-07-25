@@ -1,5 +1,5 @@
 <!-- 部门工种岗位人员组件 -->
-<!-- 
+<!--
 必传属性：
   outerVisible：false（默认）控制本组件显示隐藏配合closeOuterDialog使用
 必传事件：
@@ -8,7 +8,7 @@
 <template>
   <div class="deptworkjobper">
     <!-- 外部dialog -->
-    <el-dialog :visible.sync="outerVisible" :show-close="false">
+    <el-dialog :visible="outerVisible" :show-close="false">
       <!-- 设置模版 -->
       <el-row :gutter="53" class="marB20">
         <el-col :span="18">
@@ -41,21 +41,50 @@
         <el-radio-button label="person" v-if="tabRadio.includes('person')">人员</el-radio-button>
       </el-radio-group>
       <!-- 部门content -->
-      <el-tabs v-model="defaultDeptTabsValue" type="border-card" @tab-click="handleDeptTabsClick" class="tab-color" v-show="tabRadioCurrentValue === 'dept'">
+      <el-tabs v-model="defaultDeptTabsValue" type="border-card" @tab-click="handleDeptTabsClick" class="tab-color" v-show="tabRadioCurrentValue === 'dept'" editable >
         <el-tab-pane v-for="items in deptTabs" :label="items.name" :name="items.id" :key="items.id" :pid="items.pid">
+          <!-- 数据 -->
+          <span v-for="item in items.children" :key="item.id" >
+            <el-button style="margin: 5px" :type="item.id == tableData.didId?'danger':''" @click="deptClick(item)">{{item.name}}</el-button>
+          </span>
+        </el-tab-pane>
+      </el-tabs>
+      <!-- 工种content -->
+      <el-tabs v-model="defaultDeptTabsValue" type="border-card" @tab-click="handleDeptTabsClick" class="tab-color" v-show="tabRadioCurrentValue === 'pro'">
+        <el-tab-pane v-for="items in proTabs" :label="items.name" :name="items.id" :key="items.id" :pid="items.pid">
           <el-row>
             <el-button type="text" class="text-btn marL10">取消全选</el-button>
             <el-button type="text" class="text-btn">全选</el-button>
           </el-row>
-          <el-badge v-for="item in items.children" :key="item.id" :value="0" :max="99" class="item">
+          <!-- 数据 -->
+          <!-- <el-badge v-for="item in items.children" :key="item.id" :value="0" :max="99" class="item">
             <el-button size='mini' :class="deptCheckedId.includes(item.id)?'default-btn default-btn-active':'default-btn'" @click="deptIsChecked(item)">{{item.name}}</el-button>
-          </el-badge>
+          </el-badge> -->
+          <span v-for="item in items.children" :key="item.id" >
+            <el-button style="margin: 5px" :type="tableData.pidArrs.indexOf(item.cid) != -1?'danger':''" @click="proClick(item.cid)">{{item.name}}</el-button>
+          </span>
+        </el-tab-pane>
+      </el-tabs>
+      <!-- 岗位content -->
+      <el-tabs v-model="defaultDeptTabsValue" type="border-card" @tab-click="handleDeptTabsClick" class="tab-color" v-show="tabRadioCurrentValue === 'occ'">
+        <el-tab-pane v-for="items in occTabs" :label="items.name" :name="items.id" :key="items.id" :pid="items.pid">
+          <el-row>
+            <el-button type="text" class="text-btn marL10">取消全选</el-button>
+            <el-button type="text" class="text-btn">全选</el-button>
+          </el-row>
+          <!-- 数据 -->
+          <!-- <el-badge v-for="item in items.children" :key="item.id" :value="0" :max="99" class="item">
+            <el-button size='mini' :class="deptCheckedId.includes(item.id)?'default-btn default-btn-active':'default-btn'" @click="deptIsChecked(item)">{{item.name}}</el-button>
+          </el-badge> -->
+          <span v-for="item in items.children" :key="item.id" >
+            <el-button style="margin: 5px" :type="tableData.gidArrs.indexOf(item.cid) != -1?'danger':''" @click="occClick(item.cid)">{{item.name}}</el-button>
+          </span>
         </el-tab-pane>
       </el-tabs>
       <!-- 外部dialog footer -->
       <div slot="footer" class="dialog-footer">
         <el-button @click="closeOuterDialog(false)" class='default-btn'>取 消</el-button>
-        <el-button type="primary" @click="closeOuterDialog(true)" class='primary-btn'>确定</el-button>
+        <el-button type="primary" @click="closeOuterDialog(false)" class='primary-btn'>确定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -73,7 +102,12 @@ export default {
     // show 部门/工种/岗位/人员
     tabRadio: {
       type: Array,
-      default: ['dept', 'pro', 'occ', 'person']
+      default: ['dept', 'pro', 'occ']
+    },
+    // 传过来点击当前条信息
+    tableData: {
+      type: Object,
+      default: {}
     }
     // 父组件传过来的deptCheckItem
     // deptCheckItemProp: {
@@ -85,7 +119,7 @@ export default {
     return {
       deptWorkJobTemList: [], // 模版列表
       deptWorkJobTemValue: '', // 选中模版value
-      tabRadioCurrentValue: this.tabRadio[0], // 当前tabRadio
+      tabRadioCurrentValue: this.tabRadio[1], // 当前tabRadio
       defaultDeptTabsValue: '0', // 默认选中deptTabs
       // 部门tabs
       deptTabs: [
@@ -96,14 +130,60 @@ export default {
           pid: '-1'
         }
       ],
-      deptCheckedId: [] // 部门选中id
+      // 工种tabs
+      proTabs: [
+        {
+          name: '全部',
+          id: '0',
+          children: [],
+          pid: '-1'
+        }
+      ],
+      // 岗位tabs
+      occTabs: [
+        {
+          name: '全部',
+          id: '0',
+          children: [],
+          pid: '-1'
+        }
+      ],
+      deptCheckedId: [], // 部门选中id
+      // 提交的
+      tijiao: {
+        did: '',
+        gid: [],
+        pid: []
+      }
     }
   },
   watch: {
-    // 初始化dept tabs列表
+    // 初始化dept tabs列表 部门
     dept(newDept) {
-      this.deptTabs[0].children = newDept
+      this.deptTabs[0].children = newDept.dept
+      this.proTabs[0].children = newDept.profession
+      this.occTabs[0].children = newDept.occupation
+      console.log(this.proTabs[0].children)
+      // console.log(this.deptTabs[0].children.dept)
+      // console.log(this.deptTabs[0].children.profession)
+      // console.log(this.deptTabs[0].children.occupation)
+    },
+    tabRadioCurrentValue(newName) {
+      this.tabRadioCurrentValue = newName
+    },
+    // 监听传过来的数值
+    tableData: {
+      handler: function (newVal, oldVal) {
+      },
+      deep: true,
+      // 代表开启深度监控。意思是数据的任何一个属性发生变化，监视函数需要执行
+      immediate: true
+      // 如果immediate 设置为true, 代表代码一加载 立马执行监视函数
     }
+    // 岗位
+    // occupation(newDept) {
+    //   this.deptTabs[0].children = newDept
+    // }
     // 初始化部门选中item及tabs列表
     // deptCheckItemProp: {
     //   handler(newDeptCheckItem) {
@@ -127,11 +207,11 @@ export default {
     },
     // 部门级别切换
     handleDeptTabsClick(tab, event) {
-      this.deptTabs.map((item, ind) => {
-        if(ind > tab.index) {
-          this.deptTabs.splice(ind, this.deptTabs.length)
-        }
-      })
+      // this.deptTabs.map((item, ind) => {
+      //   if(ind > tab.index) {
+      //     this.deptTabs.splice(ind, this.deptTabs.length)
+      //   }
+      // })
     },
     // 部门选中
     deptIsChecked(checkItem) {
@@ -182,6 +262,49 @@ export default {
         }
       }
     },
+    // 循环
+    // xunhuan(arr) {
+    //   if(arr.children && arr.children.length) {
+    //     this.xunhuan(arr.children)
+    //   }else{
+    //     this.tableData.didId = arr.id
+    //     this.tijiao.did = arr.id
+    //   }
+    // },
+    // 部门选中
+    deptClick(checkItem) {
+      if(checkItem.children && checkItem.children.length) {
+        // this.xunhuan(checkItem.children)
+        let obj = {
+          name: checkItem.name,
+          id: checkItem.id,
+          children: checkItem.children,
+          pid: checkItem.pid
+        }
+        this.deptTabs.push(obj)
+      }else{
+        this.tableData.didId = checkItem.id
+        this.tijiao.did = checkItem.id
+      }
+    },
+    proClick(name) {
+      if(this.tableData.pidArrs.includes(name)) {
+        let xia = this.tableData.pidArrs.indexOf(name)
+        this.tableData.pidArrs.splice(xia, 1)
+      }else{
+        this.tableData.pidArrs.push(name)
+      }
+      this.tijiao.pid = this.tableData.pidArrs
+    },
+    occClick(name) {
+      if(this.tableData.gidArrs.includes(name)) {
+        let xia = this.tableData.gidArrs.indexOf(name)
+        this.tableData.gidArrs.splice(xia, 1)
+      }else{
+        this.tableData.gidArrs.push(name)
+      }
+      this.tijiao.gid = this.tableData.gidArrs
+    },
     // 调取部门/工种/岗位列表
     init() {
       this.getDeptProOccList(this.tabRadio)
@@ -189,7 +312,10 @@ export default {
   },
   computed: {
     ...mapState({
-      dept: state => state.common.deptProOccList.dept
+      // dept: state => state.common.deptProOccList.dept
+      dept: state => state.common.deptProOccList
+      // occupation: state => state.common.deptProOccList.occupation,
+      // profession: state => state.common.deptProOccList.profession
     })
   },
   mounted() {

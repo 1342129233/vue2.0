@@ -1,19 +1,23 @@
 <template>
   <div class="enterprise">
-    <div class="enterprise-header clearfix">
-      <el-button type="success" class="add-enterprise" 
+    <!-- <div class="enterprise-header clearfix">
+      <el-button type="success" class="add-enterprise"
       @click="()=>this.$router.push({path: '/addenterprise', query: { pid: 0, tit: 'addBusiness', eid: 0 }})">添加企业</el-button>
-    </div>
-    <el-divider></el-divider>
-    <el-tabs type="card">
+    </div> -->
+    <!-- <el-divider></el-divider> -->
+    <el-tabs type="card" class="Header">
       <el-tab-pane label="企业管理">
         <el-card shadow="always" class="search-card">
           <el-input v-model="enterpriseName" placeholder="企业名称"></el-input>
           <el-button id="search" @click="getCompanylist(enterpriseName)">搜索</el-button>
+          <div class="enterprise-header clearfix wxyou">
+            <el-button type="success" class="add-enterprise"
+            @click="()=>this.$router.push({path: '/addenterprise', query: { pid: 0, tit: 'addBusiness', eid: 0 }})">添加企业</el-button>
+          </div>
         </el-card>
       </el-tab-pane>
     </el-tabs>
-    <el-row>
+    <el-row class="wxtable">
       <el-col>
         企业总数：
         <el-button type="text">{{ company_sum_count }}</el-button>
@@ -34,10 +38,10 @@
         <template slot-scope="scope">
           <el-button
             size="mini"
-            @click="handleEnter(scope.row)" 
+            @click="handleEnter(scope.row)"
             v-if='!scope.row.is_admin && scope.row.is_come_company'>进入企业</el-button>
-          <el-dropdown size="mini" split-button 
-          v-if='scope.row.is_admin' 
+          <el-dropdown size="mini" split-button
+          v-if='scope.row.is_admin'
           @command="handleCommand"
           @click="handleEditorialBusiness({ tit: 'editBusiness', scopeRow: scope.row})">编辑企业
             <el-dropdown-menu slot="dropdown">
@@ -136,7 +140,28 @@ export default {
   color: #858586;
 }
 
+body .el-dropdown-menu--mini .el-dropdown-menu__item{
+  line-height:24px;
+  padding:0 20px;
+  font-size:14px;
+}
+
 .el-input {
   width: 200px;
+}
+.wxyou{
+  display: inline-block;
+  float: right;
+}
+.Header{
+  position: fixed;
+  background-color: #FFF;
+  top: 60px;
+  padding-top:5px;
+  width:100%;
+  z-index: 999;
+}
+.wxtable{
+  margin-top:140px;
 }
 </style>

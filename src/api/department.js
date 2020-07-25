@@ -37,3 +37,22 @@ export function setProOccRequest(data) {
     data
   })
 }
+
+// 设置员工列表
+export function setEmployeelistRequest(num) {
+  let data = num
+  return axios.request({
+    url: `/${_api}/admin/person/list`,
+    method: 'POST',
+    data
+  })
+}
+
+// 添加员工
+export function addStaffRequest(data) {
+  return axios.request({
+    url: `/${_api}/admin/person/cre`,
+    method: 'POST',
+    data
+  })
+}

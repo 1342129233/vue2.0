@@ -1,7 +1,7 @@
 <template>
   <div class="top-navbar">
     <el-menu
-      mode="horizontal" 
+      mode="horizontal"
       text-color="#fff"
       active-text-color="#fff"
       :style="this.sidebarHidden ? {'backgroundColor':'#222222'} : {'backgroundColor':'#38A28A'}">
@@ -11,7 +11,7 @@
           <img :src="require('../../static/image/logo.jpeg')"/>
         </el-avatar>{{this.sidebarHidden ? $t('backstage.title') : $t('navbar.title')}}</el-menu-item>
       </router-link> -->
-      
+
         <el-menu-item index="1" class="title-name">
           <!-- <router-link to="/enterprise" class='title-logo' :style="this.sidebarHidden ? {color:'#838383'} : {color: '#fff'}">
             <el-avatar class="marR10" :size="40" @error="errorHandler" v-show='!this.sidebarHidden'>
@@ -34,7 +34,7 @@
             <router-link to="">信息获取</router-link>
           </div>
         </el-menu-item>
-      
+
       <!-- 换肤/全屏/中英文切换 -->
       <!-- <change-theme class="theme-container"></change-theme>
 
@@ -71,7 +71,7 @@
             </el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
-      </div>  
+      </div>
     </el-menu>
   </div>
 </template>
@@ -148,7 +148,7 @@
       top 18px
       right 150px
     .lang-select /deep/ .el-dropdown
-      font-size 20px  
+      font-size 20px
       color #fff
     .avatar-container
       position absolute

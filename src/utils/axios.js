@@ -8,7 +8,7 @@ import { Message } from 'element-ui'
 
 class HttpRequest {
   constructor(baseUrl) {
-    this.baseUrl = baseUrl
+    this.baseUrl = baseUrl  // _api 接口
     this.queue = {}
   }
   getInsideConfig() {
@@ -38,17 +38,18 @@ class HttpRequest {
       store.dispatch('loading', true)
     }
   }
-  interceptors(instance, url) {
+  interceptors(instance, url) {   // 请求头  地址
     // 请求拦截
+    // console.log(url)  // 每次调用都执行
     instance.interceptors.request.use(config => {
       // 添加全局的loading
-      if (!Object.keys(this.queue).length) {
+      if (!Object.keys(this.queue).length) {  // true
         // 处理一些事情
-        if (defaultConfig.hideModal.indexOf(url) <= 0) {
+        if (defaultConfig.hideModal.indexOf(url) <= 0) {  // 不存在 或者是 下标0 的
           store.dispatch('loading', true)
         }
       }
-      // token的一些处理
+      // token的一些处理, 带 token  到头部中
       // let token = localStorage.getItem('token')
       let token = getToken('token')
       if (token) {

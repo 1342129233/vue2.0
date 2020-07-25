@@ -4,6 +4,7 @@
  */
 import router from './router'
 import store from './store'
+// 加载进度条
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'// progress bar style
 import { getToken } from '@/common/auth'

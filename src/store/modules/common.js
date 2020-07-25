@@ -1,5 +1,5 @@
 import {uploadTokenResquest, getPCATreeRequest, getDeptProOccResquest, getPersonListRequest, getDeptModalListRequest,
-  cuDeptTemplateRequest} from '@/api/common'
+  cuDeptTemplateRequest, ryglbgg} from '@/api/common'
 // const SET_LOADING = 'SET_LOADING'
 const common = {
   state: {
@@ -18,7 +18,12 @@ const common = {
       last_page: 0,
       total: 0
     },
-    deptModalList: [] // 部门工种岗位模版列表
+    deptModalList: [], // 部门工种岗位模版列表
+    yyglbgg: {
+      did: [],
+      pid: [],
+      gid: []
+    }
   },
   mutations: {
     // 全局loading
@@ -46,6 +51,11 @@ const common = {
     // 保存部门工种岗位模版列表
     SAVE_DEPTMODALLIST(state, deptModalList) {
       state.deptModalList = deptModalList
+    },
+    SAVE_RYGLBGG(state, bgg) {
+      state.yyglbgg.did = bgg.dept
+      state.yyglbgg.pid = bgg.occupation
+      state.yyglbgg.gid = bgg.profession
     }
   },
   actions: {
@@ -79,6 +89,7 @@ const common = {
     getDeptProOccList({ commit }, data) {
       return new Promise((resolve, reject) => {
         getDeptProOccResquest(data).then(({data}) => {
+          console.log(data.data)
           commit('SAVE_DEPTPROOCCLIST', data.data)
           return resolve(data)
         }).catch(err => {
@@ -112,6 +123,17 @@ const common = {
     cuDeptTemplate(_, deptModalParams) {
       return new Promise((resolve, reject) => {
         cuDeptTemplateRequest(deptModalParams).then(({data}) => {
+          return resolve(data)
+        }).catch(err => {
+          return reject(err)
+        })
+      })
+    },
+    // 人员管理的部门工种岗位列表
+    Renbgg({ commit }) {
+      return new Promise((resolve, reject) => {
+        ryglbgg().then(({data}) => {
+          commit('SAVE_RYGLBGG', data.data)
           return resolve(data)
         }).catch(err => {
           return reject(err)

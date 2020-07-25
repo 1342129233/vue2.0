@@ -1,11 +1,15 @@
 // import { logout } from '@/api/login1'
-import { login, logout, companylistRequest, addEnterpriseResquest, deletebusinessResquest,
+
+import { login, companylistRequest, addEnterpriseResquest, deletebusinessResquest,
   getIconListResquest, getFunListResquest, setIconResquest, setFunResquest, getEnterpriseResquest,
   postEnterpriseResquest, setEnterpriseIdResquest} from '@/api/login'
-import { getToken, setToken, removeToken } from '@/common/auth'
+import { getToken, setToken } from '@/common/auth'
 import { saveToLocal } from '@/common/local-storage'
 import { Message } from 'element-ui'
 import router from '@/router'
+import Cookies from 'js-cookie'
+
+const TokenKey = 'token'
 // import { getUserInfo } from '@/api/user'
 
 const SET_TOKEN = 'SET_TOKEN'
@@ -95,10 +99,11 @@ const user = {
     login({ commit }, userInfo) {
       return new Promise((resolve, reject) => {
         login(userInfo).then(({ data }) => {
+          console.log(data)
           if (data.code === 0) {
             setToken(data.data.token)
-            commit(SET_TOKEN, data.data.token)
-            commit(SET_USERINFO, data.data.user)
+            commit(SET_TOKEN, data.data.token)     // 存 token
+            commit(SET_USERINFO, data.data.user)   // 存账号密码
             return resolve(data)
           }
         }).catch(err => {
@@ -185,24 +190,25 @@ const user = {
     // },
     // 用户退出登录
     logout({ commit }) {
-      return new Promise((resolve, reject) => {
-        logout().then(resp => {
-          removeToken()
-          commit(SET_TOKEN, '')
-          // commit(SET_NAME, '')
-          // commit('setUserToken', {
-          //   'user_name': '',
-          //   'password': '',
-          //   'permissions': '',
-          //   'access_token': '',
-          //   'refresh_token': '',
-          //   'expires_in': 0
-          // })
-          return resolve()
-        }).catch(err => {
-          return reject(err)
-        })
-      })
+      Cookies.remove(TokenKey)
+      // return new Promise((resolve, reject) => {
+      //   logout().then(resp => {
+      //     removeToken()
+      //     commit(SET_TOKEN, '')
+      //     // commit(SET_NAME, '')
+      //     // commit('setUserToken', {
+      //     //   'user_name': '',
+      //     //   'password': '',
+      //     //   'permissions': '',
+      //     //   'access_token': '',
+      //     //   'refresh_token': '',
+      //     //   'expires_in': 0
+      //     // })
+      //     return resolve()
+      //   }).catch(err => {
+      //     return reject(err)
+      //   })
+      // })
     },
     // 企业登陆管理列表
     getCompanylist({commit}, keyword) {

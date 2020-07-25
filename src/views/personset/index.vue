@@ -7,12 +7,12 @@
     <el-card shadow='always' class='marT20'>
       <el-form :inline="true">
         <el-form-item label='部门选择' label-width='70px' class='from-item-marb0'>
-          <el-input label='部门选择' :style="{width: '170px'}" class='input-focus' v-model="deptName" placeholder="请输入部门名称"/>
+          <el-cascader :options="dept" :props="{ value: 'id', label: 'name'}" v-model="deptName" :show-all-levels="false"></el-cascader>
         </el-form-item>
         <el-form-item label='工种选择' label-width='70px' class='from-item-marb0'>
           <!-- <el-input label='工种选择' :style="{width: '170px'}" class='input-focus' v-model="pro"/> -->
-          <el-select v-model="proId" 
-              clearable placeholder="请选择工种" 
+          <el-select v-model="proId"
+              clearable placeholder="请选择工种"
               class="select-color"
               popper-class="select-options-color">
             <el-option
@@ -24,8 +24,8 @@
           </el-select>
         </el-form-item>
         <el-form-item label='岗位选择' label-width='70px' class='from-item-marb0'>
-          <el-select v-model="occId" 
-              clearable placeholder="请选择岗位" 
+          <el-select v-model="occId"
+              clearable placeholder="请选择岗位"
               class="select-color"
               popper-class="select-options-color">
             <el-option
@@ -52,23 +52,23 @@
         <el-button class='primary-btn marL10' @click="openDialog({row: null,tit: ''})">添加员工</el-button>
         <el-button class='primary-btn'>批量导入员工</el-button>
       </div>
-      <el-table :data="newdepartmentList" row-key="did" :header-cell-style="{backgroundColor: '#F5F7FA'}" max-height="400">
+      <el-table :data="newdepartmentList" row-key="id" :header-cell-style="{backgroundColor: '#F5F7FA'}" max-height="400">
         <el-table-column prop='' label='头像' align='center' width="150">
           <template>
             <el-avatar shape="square" :size="50" src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png"></el-avatar>
           </template>
         </el-table-column>
-        <el-table-column prop='name' label='真实姓名' align='center' width="150"></el-table-column>
-        <el-table-column prop='name' label='手机号' align='center' width="150"></el-table-column>
-        <el-table-column prop='name' label='部门' align='center' width="150"></el-table-column>
-        <el-table-column prop='name' label='工种' align='center' width="150"></el-table-column>
-        <el-table-column prop='name' label='岗位' align='center' width="150"></el-table-column>
-        <el-table-column prop='name' label='加入时间' align='center' width="150"></el-table-column>
+        <el-table-column prop='truename' label='真实姓名' align='center' width="150"></el-table-column>
+        <el-table-column prop='verifiedMobile' label='手机号' align='center' width="150"></el-table-column>
+        <el-table-column prop='did' label='部门' align='center' width="150"></el-table-column>
+        <el-table-column prop='gid' label='工种' align='center' width="150"></el-table-column>
+        <el-table-column prop='pid' label='岗位' align='center' width="150"></el-table-column>
+        <el-table-column prop='createdTime' label='加入时间' align='center' width="150"></el-table-column>
         <el-table-column prop='' label='操作' align='center' width='200px' fixed="right">
-          <template slot-scope="scope">
+          <template slot-scope="newdepartmentList">
             <!-- <el-button type='text' class="text-btn">修改信息</el-button>
             <el-button type='text' class="text-btn">修改密码</el-button> -->
-            <el-button type='text' class="text-btn" @click="openSetDeptProOccDialog">部门工种岗位设置</el-button>
+            <el-button type='text' class="text-btn" @click="openSetDeptProOccDialog(newdepartmentList.$index, newdepartmentList.row)">部门工种岗位设置</el-button>
             <el-button type='text' class="text-btn">分配岗位组</el-button>
             <!-- <el-button type='text' class="error-text-btn">删除员工</el-button> -->
             <el-dropdown trigger="click">
@@ -83,21 +83,73 @@
         </el-table-column>
       </el-table>
     </el-card>
-
+    <!-- 分页 -->
+    <div class="align">
+      <div class="block">
+        <el-pagination
+          background
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page.sync="currentPage"
+          :page-size="FYsize"
+          layout="prev, pager, next, jumper"
+          :total="total">
+        </el-pagination>
+      </div>
+    </div>
     <el-dialog :title="dialogTit" :visible.sync="dialogFormVisible">
-      <el-form :model="departmentInfo">
-        <el-form-item label="部门名称" label-width="120px">
-          <el-input v-model="departmentInfo.name" :style="{width: '400px'}" class='input-focus'></el-input>
+      <el-form :model="personCre">
+        <el-form-item label="用户名" label-width="120px">
+          <el-input v-model="personCre.nickname" :style="{width: '400px'}" class='input-focus'></el-input>
         </el-form-item>
-        <el-form-item label="部门简介" label-width="120px">
-          <el-input
-            type="textarea"
-            :rows="5"
-            placeholder="请输入内容"
-            v-model="departmentInfo.des"
-            :style="{width: '400px'}"
-            class='input-focus'>
-          </el-input>
+        <el-form-item label="密码" label-width="120px">
+          <el-input v-model="personCre.password" :style="{width: '400px'}" class='input-focus'></el-input>
+        </el-form-item>
+        <el-form-item label="确认密码" label-width="120px">
+          <el-input v-model="personCre.password2" :style="{width: '400px'}" class='input-focus'></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" label-width="120px">
+          <el-input v-model="personCre.verifiedMobile" :style="{width: '400px'}" class='input-focus' maxlength="11"></el-input>
+        </el-form-item>
+        <el-form-item label="真实姓名" label-width="120px">
+          <el-input v-model="personCre.truename" :style="{width: '400px'}" class='input-focus'></el-input>
+        </el-form-item>
+        <el-form-item label="拼音" label-width="120px">
+          <el-input v-model="personCre.pinyin" :style="{width: '400px'}" class='input-focus'></el-input>
+        </el-form-item>
+        <el-form-item label="批次分类" label-width="120px">
+          <el-input v-model="personCre.batch_tag" :style="{width: '400px'}" class='input-focus'></el-input>
+        </el-form-item>
+        <el-form-item label='部门选择' label-width="120px">
+          <el-cascader :options="yyglbgg_did" :show-all-levels="false" v-model="personCre.did" :props="{ value: 'id', label: 'name'}"></el-cascader>
+        </el-form-item>
+        <el-form-item label="工种选择" label-width="120px">
+          <el-select v-model="personCre.gid"
+              multiple
+              clearable placeholder="请选择工种"
+              class="select-color"
+              popper-class="select-options-color">
+            <el-option
+              v-for="item in yyglbgg_gid"
+              :key="item.cid"
+              :label="item.name"
+              :value="item.cid">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="岗位选择" label-width="120px">
+          <el-select v-model="personCre.pid"
+              multiple
+              clearable placeholder="请选择工种"
+              class="select-color"
+              popper-class="select-options-color">
+            <el-option
+              v-for="item in yyglbgg_pid"
+              :key="item.cid"
+              :label="item.name"
+              :value="item.cid">
+            </el-option>
+          </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -105,18 +157,22 @@
         <el-button type="primary" @click="closeDialog(true)" class='primary-btn' :loading="addLoading">{{isRevise?'修改':'添加'}}</el-button>
       </div>
     </el-dialog>
-    <Deptworkjobper 
-      :outerVisible="outerVisible" 
+    <Deptworkjobper
+      v-if="showis"
+      :tableData="tableData"
+      :outerVisible="outerVisible"
       :FproCheckedId="proCheckedId"
       :FoccCheckedId="occCheckedId"
-      @closeDeptproocc="closeDeptproocc" 
-      :tabRadio="['dept','pro','occ']"></Deptworkjobper>
+      @closeDeptproocc="closeDeptproocc"
+      @closeOuterDialog="closeOuterDialog"
+      :tabRadio="['dept','pro','occ']"
+      ></Deptworkjobper>
   </div>
 </template>
 <script>
 import { mapActions, mapState } from 'vuex'
 import Deptproocc from '../common/deptproocc.vue'
-import Deptworkjobper from '../common/deptworkjobper'
+import Deptworkjobper from '../common/deptworkjobper'  // 模板
 export default {
   name: 'departmentset',
   components: {
@@ -125,15 +181,20 @@ export default {
   },
   data() {
     return {
+      total: 1, // 总条数
+      FYsize: 10, // 分页每页多少条
+      currentPage: 1,  // 当前页数
       newdepartmentList: [], // 部门列表数据
       dialogFormVisible: false, // dialog显示隐藏
       dialogTit: '添加部门', // dialog title
       addLoading: false, // 添加部门loading
       // 部门信息
       departmentInfo: {
-        pid: 0,
-        name: '',
-        des: ''
+        truename: '', // 姓名
+        verifiedMobile: '', // 手机号
+        did: [], // 部门
+        pid: [], // 工种
+        gid: []  // 岗位
       },
       keyword: '', // 搜索关键字
       isRevise: false, // 是否是修改部门信息
@@ -141,15 +202,102 @@ export default {
       setProOccDid: '0', // 要设置的工种岗位部门id
       proCheckedId: [],
       occCheckedId: [],
-      deptName: '',
-      proId: '',
-      occId: ''
+      deptName: '',  // 筛选部门
+      proId: '',     // 筛选工种
+      occId: '',     // 筛选岗位
+      // 添加员工
+      personCre: {
+        nickname: '',
+        password: '',
+        password2: '',
+        verifiedMobile: '',
+        truename: '',
+        pinyin: '',
+        batch_tag: '',
+        did: '',
+        pid: [],
+        gid: []
+      },
+      // 弹框的当前信息
+      tableData: {},
+      showis: false
     }
   },
   methods: {
-    ...mapActions(['getDepartmentList', 'addDepartment', 'reviseDepartmentInfo', 'deleteDepartment', 'setProOcc']),
-    openSetDeptProOccDialog() {
+    ...mapActions(['getDepartmentList', 'addStaff', 'reviseDepartmentInfo', 'deleteDepartment', 'setProOcc', 'setEmployeelist', 'Renbgg']),
+    openSetDeptProOccDialog(index, data) {
       this.outerVisible = true
+      this.tableData = data
+      this.showis = true
+    },
+    // 关闭弹框
+    closeOuterDialog(objParams) {
+      this.outerVisible = objParams.outerVisible
+    },
+    // 分页  每页条数
+    handleSizeChange(val) {
+
+    },
+    // 分页  当前第几页
+    handleCurrentChange(val) {
+      this.currentPage = val
+      let num = {
+        page: this.currentPage,
+        did: this.deptName[0],
+        pid: this.proId,
+        gid: this.occId,
+        keyword: this.keyword
+      }
+      this.setEmployeelist(num).then(({data}) => {
+        this.total = +data.total
+        let sd = data.data
+        // this.newdepartmentList = data.data
+        this.$set(this.newdepartmentList, 0, sd)
+        for(let i = 0; i < sd.length; i++) {
+          this.$set(this.newdepartmentList, i, sd[i])
+        }
+      })
+    },
+    // 检测提交信息
+    verification() {
+      let jc = this.personCre
+      let reg = /^1[0-9]{10}$/
+      if(jc.nickname === '') {
+        this.$message({type: 'warning', message: '账号不能为空'})
+        return false
+      }else if(jc.password === '') {
+        this.$message({type: 'warning', message: '密码不能为空'})
+        return false
+      }else if(jc.password2 === '') {
+        this.$message({type: 'warning', message: '再次输入密码不能为空'})
+        return false
+      }else if(jc.verifiedMobile === '' || jc.verifiedMobile.length <= 10 || !reg.test(jc.verifiedMobile)) {
+        this.$message({type: 'warning', message: '请输入正确的手机号码'})
+        return false
+      }else if(jc.truename === '') {
+        this.$message({type: 'warning', message: '真实姓名不能为空'})
+        return false
+      }else if(jc.pinyin === '') {
+        this.$message({type: 'warning', message: '拼音不能为空'})
+        return false
+      }else if(jc.batch_tag === '') {
+        this.$message({type: 'warning', message: '批次分类不能为空'})
+        return false
+      }else if(jc.did.length === 0) {
+        this.$message({type: 'warning', message: '部门不能为空'})
+        return false
+      }else if(jc.pid.length === 0) {
+        this.$message({type: 'warning', message: '岗位不能为空'})
+        return false
+      }else if(jc.gid.length === 0) {
+        this.$message({type: 'warning', message: '工种不能为空'})
+        return false
+      }else if(jc.password !== jc.password2) {
+        this.$message({type: 'warning', message: '请保证两次输入的密码一直'})
+        return false
+      }else {
+        return true
+      }
     },
     // 弹出dialog
     openDialog({row, tit}) {
@@ -170,11 +318,13 @@ export default {
           des: row.des
         }
       }else{
-        this.dialogTit = '添加部门'
+        this.dialogTit = '添加员工'
         this.departmentInfo = {
-          pid: 0,
-          name: '',
-          des: ''
+          truename: '', // 姓名
+          verifiedMobile: '', // 手机号
+          did: [], // 部门
+          pid: [], // 工种
+          gid: []  // 岗位
         }
       }
     },
@@ -186,23 +336,46 @@ export default {
           this.reviseDepartmentInfo(this.departmentInfo).then(({data}) => {
             this.dialogFormVisible = false
             this.addLoading = false
-            this.getDepartmentList().then(({data}) => {
-              this.newdepartmentList = data
+            // 换
+            this.setEmployeelist().then(({data}) => {
+              this.newdepartmentList = data.data
             })
           }).catch(() => {
             this.dialogFormVisible = false
           })
         }else{
-          this.addDepartment(this.departmentInfo).then(({data}) => {
-            this.addLoading = false
-            this.dialogFormVisible = false
-            this.$message.success('添加成功')
-            this.getDepartmentList().then(({data}) => {
-              this.newdepartmentList = data
+          // 判定是否为空，再次输出密码是不是一样的
+          if(this.verification()) {
+            this.personCre.did = this.personCre.did[0]
+            this.addStaff(this.personCre).then((data) => {
+              if(data !== 0) {
+                this.$message.error(data.msg)
+              }else{
+                this.addLoading = false
+                this.dialogFormVisible = false
+                this.$message.success('添加成功')
+                this.personCre = {
+                  nickname: '',
+                  password: '',
+                  password2: '',
+                  verifiedMobile: '',
+                  truename: '',
+                  pinyin: '',
+                  batch_tag: '',
+                  did: '',
+                  pid: [],
+                  gid: []
+                }
+              }
+              this.setEmployeelist().then(({data}) => {
+                this.newdepartmentList = data.data
+              })
+            }).catch(() => {
+              this.dialogFormVisible = false
             })
-          }).catch(() => {
-            this.dialogFormVisible = false
-          })
+          } else {
+            this.addLoading = false
+          }
         }
       }else{
         this.dialogFormVisible = dialogFormVisible
@@ -211,31 +384,43 @@ export default {
     },
     // 筛选
     sift() {
-      let itemPath = []
-      let newArrData = []
-      this.siftChild(this.departmentList, itemPath)
-      Array.from(new Set(itemPath))
-      this.departmentList.map(item => {
-        if(itemPath.includes(item.did)) {
-          newArrData.push(item)
-        }
+      let num = {
+        page: this.currentPage,
+        did: this.deptName[0],
+        pid: this.proId,
+        gid: this.occId,
+        keyword: this.keyword
+      }
+      this.setEmployeelist(num).then(({data}) => {
+        console.log(data.data)
+        this.total = +data.total
+        this.newdepartmentList = data.data
       })
-      this.newdepartmentList = newArrData
+      // let itemPath = []
+      // let newArrData = []
+      // this.siftChild(this.departmentList, itemPath)
+      // Array.from(new Set(itemPath))
+      // this.departmentList.map(item => {
+      //   if(itemPath.includes(item.did)) {
+      //     newArrData.push(item)
+      //   }
+      // })
+      // this.newdepartmentList = newArrData
     },
     // 递归查找返回path
-    siftChild(children, itemPath) {
-      children.map((item, ind) => {
-        if(item.name.indexOf(this.keyword) !== -1) {
-          itemPath.push(item.path.split('|')[1])
-        }else{
-          if(item.children && item.children.length) {
-            this.siftChild(item.children, itemPath)
-          }else{
-            return false
-          }
-        }
-      })
-    },
+    // siftChild(children, itemPath) {
+    //   children.map((item, ind) => {
+    //     if(item.name.indexOf(this.keyword) !== -1) {
+    //       itemPath.push(item.path.split('|')[1])
+    //     }else{
+    //       if(item.children && item.children.length) {
+    //         this.siftChild(item.children, itemPath)
+    //       }else{
+    //         return false
+    //       }
+    //     }
+    //   })
+    // },
     // 下拉选中
     handleCommand({tit, scopeRow}) {
       switch(tit) {
@@ -309,13 +494,29 @@ export default {
   computed: {
     ...mapState({
       departmentList: state => state.department.departmentList,
+      dept: state => state.common.deptProOccList.dept,
       profession: state => state.common.deptProOccList.profession,
-      occupation: state => state.common.deptProOccList.occupation
+      occupation: state => state.common.deptProOccList.occupation,
+      yyglbgg_did: state => state.common.yyglbgg.did,
+      yyglbgg_pid: state => state.common.yyglbgg.pid,
+      yyglbgg_gid: state => state.common.yyglbgg.gid,
+      employeeList: state => state.department.employeeList
     })
   },
   mounted() {
     this.getDepartmentList().then(({data}) => {
-      this.newdepartmentList = data
+      // this.newdepartmentList = data
+      // console.log(data)
+    })
+    this.setEmployeelist().then(({data}) => {
+      this.total = +data.total
+      this.newdepartmentList = data.data
+      console.log(this.newdepartmentList)
+    })
+
+    this.Renbgg().then(({data}) => {
+      // console.log(data)
+      // this.newdepartmentList = data.data
     })
   }
 }
@@ -330,4 +531,7 @@ export default {
   .el-dropdown-menu__item:hover
     color #38A28A
     border-color #38A28A
+  .align
+    text-align center
+    margin-top 20px
 </style>
