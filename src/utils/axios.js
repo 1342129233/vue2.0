@@ -13,7 +13,7 @@ class HttpRequest {
   }
   getInsideConfig() {
     const config = {
-      baseURL: process.env.NODE_ENV === 'production' ? 'https://dev2.hse365.cc' : this.baseUrl,
+      baseURL: process.env.NODE_ENV === 'production' ? 'https://dev2.hse365.cc' : this.baseUrl,  // 区分开发还是生产环境
       transformRequest: [function (data) {
         return Qs.stringify(data)
       }],
@@ -98,12 +98,12 @@ class HttpRequest {
     })
   }
   request(options) {
-    const instance = axios.create({
+    const instance = axios.create({  // 请求时长
       timeout: 15000
     })
     // instance.defaults.headers.common['Access-Control-Allow-Origin'] = '*'
-    options = Object.assign(this.getInsideConfig(), options)
-    instance.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
+    options = Object.assign(this.getInsideConfig(), options)    // 合并两个对象
+    instance.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'  // 请求头
     this.interceptors(instance, options.url)
     return instance(options)
   }

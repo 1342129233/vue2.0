@@ -75,8 +75,8 @@
               <el-button type='text'>更多<i class="el-icon-arrow-down el-icon--right"></i></el-button>
               <el-dropdown-menu>
                 <el-dropdown-item>修改信息</el-dropdown-item>
-                <el-dropdown-item>修改密码</el-dropdown-item>
-                <el-dropdown-item>删除员工</el-dropdown-item>
+                <el-dropdown-item @click.native="optionpassworld(newdepartmentList.row)">修改密码</el-dropdown-item>
+                <el-dropdown-item @click.native="staffDeleteWang(newdepartmentList.row)">删除员工</el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
           </template>
@@ -157,6 +157,20 @@
         <el-button type="primary" @click="closeDialog(true)" class='primary-btn' :loading="addLoading">{{isRevise?'修改':'添加'}}</el-button>
       </div>
     </el-dialog>
+    <el-dialog title="修改密码" :visible.sync="passworldFormVisible">
+      <el-form :model="passworldmodify">
+        <el-form-item label="密码" label-width="100px">
+          <el-input v-model="passworldmodify.oldpassworld" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="确认密码" label-width="100px">
+          <el-input v-model="passworldmodify.newpassworld" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="ispassworldClose(false)">取 消</el-button>
+        <el-button type="primary" @click="passworldClose(false)">确 定</el-button>
+      </div>
+    </el-dialog>
     <Deptworkjobper
       v-if="showis"
       :tableData="tableData"
@@ -186,8 +200,15 @@ export default {
       currentPage: 1,  // 当前页数
       newdepartmentList: [], // 部门列表数据
       dialogFormVisible: false, // dialog显示隐藏
+      passworldFormVisible: false, // 修改密码隐藏显示
       dialogTit: '添加部门', // dialog title
       addLoading: false, // 添加部门loading
+      // 修改密码回显
+      passworldmodify: {
+        id: '',
+        oldpassworld: '',
+        newpassworld: ''
+      },
       // 部门信息
       departmentInfo: {
         truename: '', // 姓名
@@ -224,11 +245,61 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['getDepartmentList', 'addStaff', 'reviseDepartmentInfo', 'deleteDepartment', 'setProOcc', 'setEmployeelist', 'Renbgg']),
+    ...mapActions(['getDepartmentList', 'addStaff', 'reviseDepartmentInfo', 'deleteDepartment', 'setProOcc', 'setEmployeelist', 'Renbgg', 'staffDelete', 'administratorsmodify']),
     openSetDeptProOccDialog(index, data) {
       this.outerVisible = true
       this.tableData = data
       this.showis = true
+    },
+    open(val, title) {
+      this.$alert(val, title, {
+        dangerouslyUseHTMLString: true
+      })
+    },
+    // 删除员工
+    staffDeleteWang(row) {
+      // console.log(row.id)
+      this.staffDelete(row.id)
+      .then(data => {
+        if(data.code === 0) {
+          this.open('删除成功', '员工消息')
+          this.setEmployeelist().then(({data}) => {
+            this.total = +data.total
+            this.newdepartmentList = data.data
+          })
+        }
+      })
+    },
+    // 修改密码
+    optionpassworld(row) {
+      this.passworldmodify.id = row.id
+      this.passworldFormVisible = true
+    },
+    passworldClose(val) {
+      if(this.passworldmodify.oldpassworld === '') {
+        this.$message({type: 'warning', message: '输入密码不能为空'})
+        return true
+      }else if(this.passworldmodify.newpassworld === '') {
+        this.$message({type: 'warning', message: '输入密码不能为空'})
+        return true
+      }else if(this.passworldmodify.oldpassworld !== this.passworldmodify.newpassworld) {
+        this.$message({type: 'warning', message: '两次输入密码必须保持一致'})
+      }else{
+        this.administratorsmodify(this.passworldmodify)
+        .then((data) => {
+          console.log(data.data.code)
+          if(data.data.code === 0) {
+            this.passworldFormVisible = false
+            this.$message({type: 'success', message: '修改成功'})
+            this.passworldmodify.oldpassworld = ''
+            this.passworldmodify.newpassworld = ''
+            this.passworldmodify.id= ''
+          }
+        })
+      }
+    },
+    ispassworldClose(val) {
+      this.passworldFormVisible = false
     },
     // 关闭弹框
     closeOuterDialog(objParams) {

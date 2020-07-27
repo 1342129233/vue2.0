@@ -1,5 +1,5 @@
 import {uploadTokenResquest, getPCATreeRequest, getDeptProOccResquest, getPersonListRequest, getDeptModalListRequest,
-  cuDeptTemplateRequest, ryglbgg} from '@/api/common'
+  cuDeptTemplateRequest, ryglbgg, setting, staffDeleteRequest, administratorsmodifyRequest} from '@/api/common'
 // const SET_LOADING = 'SET_LOADING'
 const common = {
   state: {
@@ -134,6 +134,36 @@ const common = {
       return new Promise((resolve, reject) => {
         ryglbgg().then(({data}) => {
           commit('SAVE_RYGLBGG', data.data)
+          return resolve(data)
+        }).catch(err => {
+          return reject(err)
+        })
+      })
+    },
+    // 员工部门工种岗位设置
+    settinging(_, Arrval) {
+      return new Promise((resolve, reject) => {
+        setting(Arrval).then(data => {
+          return resolve(data)
+        }).catch(err => {
+          return reject(err)
+        })
+      })
+    },
+    // 删除员工
+    staffDelete(_, id) {
+      return new Promise((resolve, reject) => {
+        staffDeleteRequest(id).then(({data}) => {
+          return resolve(data)
+        }).catch(err => {
+          return reject(err)
+        })
+      })
+    },
+    // 管理员修改用户密码
+    administratorsmodify(_, val) {
+      return new Promise((resolve, reject) => {
+        administratorsmodifyRequest(val).then(data => {
           return resolve(data)
         }).catch(err => {
           return reject(err)

@@ -74,3 +74,40 @@ export function ryglbgg() {
     data
   })
 }
+
+// 员工部门工种岗位设置
+export function setting(val) {
+  let data = {
+    id: val.id || '',
+    did: val.did || '',
+    gid: val.gid || [],
+    pid: val.pid || []
+  }
+  console.log(data)
+  return axios.request({
+    url: `/_api/admin/person/${data.id}/setting`,
+    method: 'POST',
+    data
+  })
+}
+
+// 删除员工
+export function staffDeleteRequest(id) {
+  return axios.request({
+    url: `/_api/admin/person/${id}/del`,
+    method: 'POST'
+  })
+}
+
+// 管理员修改用户密码
+export function administratorsmodifyRequest(val) {
+  let id = val.id
+  let data = {
+    password: val.newpassworld
+  }
+  return axios.request({
+    url: `/_api/admin/person/${id}/changePassword`,
+    method: 'POST',
+    data
+  })
+}

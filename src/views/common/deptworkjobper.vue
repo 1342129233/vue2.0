@@ -41,7 +41,7 @@
         <el-radio-button label="person" v-if="tabRadio.includes('person')">人员</el-radio-button>
       </el-radio-group>
       <!-- 部门content -->
-      <el-tabs v-model="defaultDeptTabsValue" type="border-card" @tab-click="handleDeptTabsClick" class="tab-color" v-show="tabRadioCurrentValue === 'dept'" editable >
+      <el-tabs v-model="defaultDeptTabsValue" type="border-card" @tab-click="handleDeptTabsClick" class="tab-color" v-show="tabRadioCurrentValue === 'dept'" editable @tab-remove="removeTab">
         <el-tab-pane v-for="items in deptTabs" :label="items.name" :name="items.id" :key="items.id" :pid="items.pid">
           <!-- 数据 -->
           <span v-for="item in items.children" :key="item.id" >
@@ -50,7 +50,7 @@
         </el-tab-pane>
       </el-tabs>
       <!-- 工种content -->
-      <el-tabs v-model="defaultDeptTabsValue" type="border-card" @tab-click="handleDeptTabsClick" class="tab-color" v-show="tabRadioCurrentValue === 'pro'">
+      <el-tabs type="border-card" @tab-click="handleDeptTabsClick" class="tab-color" v-show="tabRadioCurrentValue === 'pro'">
         <el-tab-pane v-for="items in proTabs" :label="items.name" :name="items.id" :key="items.id" :pid="items.pid">
           <el-row>
             <el-button type="text" class="text-btn marL10">取消全选</el-button>
@@ -66,7 +66,7 @@
         </el-tab-pane>
       </el-tabs>
       <!-- 岗位content -->
-      <el-tabs v-model="defaultDeptTabsValue" type="border-card" @tab-click="handleDeptTabsClick" class="tab-color" v-show="tabRadioCurrentValue === 'occ'">
+      <el-tabs type="border-card" @tab-click="handleDeptTabsClick" class="tab-color" v-show="tabRadioCurrentValue === 'occ'">
         <el-tab-pane v-for="items in occTabs" :label="items.name" :name="items.id" :key="items.id" :pid="items.pid">
           <el-row>
             <el-button type="text" class="text-btn marL10">取消全选</el-button>
@@ -84,7 +84,7 @@
       <!-- 外部dialog footer -->
       <div slot="footer" class="dialog-footer">
         <el-button @click="closeOuterDialog(false)" class='default-btn'>取 消</el-button>
-        <el-button type="primary" @click="closeOuterDialog(false)" class='primary-btn'>确定</el-button>
+        <el-button type="primary" @click="closeOuterDialog(false);handleConfirmUseLayoutBtn()" class='primary-btn'>确定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -151,6 +151,7 @@ export default {
       deptCheckedId: [], // 部门选中id
       // 提交的
       tijiao: {
+        id: '',
         did: '',
         gid: [],
         pid: []
@@ -197,13 +198,17 @@ export default {
     // }
   },
   methods: {
-    ...mapActions(['getDeptProOccList']),
+    ...mapActions(['getDeptProOccList', 'settinging']),
     // 关闭dialog，点击确定要通过父组件将outerVisible设置为false来关闭，否则不关闭
     closeOuterDialog(boo) {
       let objParams = {
         outerVisible: boo
       }
       this.$emit('closeOuterDialog', objParams)
+    },
+    // 提交
+    handleConfirmUseLayoutBtn() {
+      this.settinging(this.tijiao)
     },
     // 部门级别切换
     handleDeptTabsClick(tab, event) {
@@ -274,17 +279,45 @@ export default {
     // 部门选中
     deptClick(checkItem) {
       if(checkItem.children && checkItem.children.length) {
-        // this.xunhuan(checkItem.children)
         let obj = {
           name: checkItem.name,
           id: checkItem.id,
           children: checkItem.children,
           pid: checkItem.pid
         }
-        this.deptTabs.push(obj)
+        let deptTabs = this.deptTabs
+        let val = []
+        deptTabs.forEach(item => {
+          if(item.id === obj.id) {
+            val.push('true')
+          }else{
+            val.push('false')
+            // this.deptTabs.push(obj)
+          }
+        })
+        let a = val.includes('true')
+        if(!a) {
+          this.deptTabs.push(obj)
+          this.defaultDeptTabsValue = checkItem.id
+        }
+        console.log(this.deptTabs)
       }else{
         this.tableData.didId = checkItem.id
         this.tijiao.did = checkItem.id
+      }
+    },
+    // 移除
+    removeTab(targetName) {
+      let deptTabs = this.deptTabs
+      for(let i = 0; i < deptTabs.length; i++) {
+        if(deptTabs[i].id === targetName) {
+          this.deptTabs.splice(i, 1)
+          if(this.deptTabs.length <= 1) {
+            this.defaultDeptTabsValue = '0'
+          }else {
+            this.defaultDeptTabsValue = deptTabs[i - 1].id
+          }
+        }
       }
     },
     proClick(name) {
@@ -317,6 +350,12 @@ export default {
       // occupation: state => state.common.deptProOccList.occupation,
       // profession: state => state.common.deptProOccList.profession
     })
+  },
+  beforeMount() {
+    this.tijiao.id = this.tableData.id
+    this.tijiao.did = this.tableData.didId
+    this.tijiao.pid = this.tableData.pidArrs
+    this.tijiao.gid = this.tableData.gidArrs
   },
   mounted() {
     this.init()
