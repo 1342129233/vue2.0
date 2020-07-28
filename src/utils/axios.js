@@ -103,7 +103,9 @@ class HttpRequest {
     })
     // instance.defaults.headers.common['Access-Control-Allow-Origin'] = '*'
     options = Object.assign(this.getInsideConfig(), options)    // 合并两个对象
-    instance.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'  // 请求头
+    // instance.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'  // 请求头  enctype="multipart/form-data"
+    instance.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;multipart/form-data'
+    instance.defaults.headers.post['enctype'] = 'multipart/form-data'
     this.interceptors(instance, options.url)
     return instance(options)
   }

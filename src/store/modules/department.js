@@ -1,4 +1,4 @@
-import {getDepartmentListRequest, addDepartmentRequest, reviseDepartmentInfoRequest, deleteDepartmentRequest, setProOccRequest, setEmployeelistRequest, addStaffRequest} from '@/api/department'
+import {getDepartmentListRequest, addDepartmentRequest, reviseDepartmentInfoRequest, deleteDepartmentRequest, setProOccRequest, setEmployeelistRequest, addStaffRequest, ExportEmployeeRequest, ImportStaffRequest} from '@/api/department'
 const department = {
   state: {
     departmentList: [],
@@ -72,6 +72,22 @@ const department = {
       return new Promise((resolve, reject) => {
         setEmployeelistRequest(num).then(({data}) => {
           commit('SAVE_SETEMPLOYEE', data.data)
+          return resolve(data)
+        }).catch(err => {
+          return reject(err)
+        })
+      })
+    },
+    // 导出员工列表
+    ExportEmployeelist(_, num) {
+      return new Promise((resolve, reject) => {
+        ExportEmployeeRequest(num)
+      })
+    },
+    // 导入员工列表
+    ImportStaff(_, files) {
+      return new Promise((resolve, reject) => {
+        ImportStaffRequest(files).then((data) => {
           return resolve(data)
         }).catch(err => {
           return reject(err)

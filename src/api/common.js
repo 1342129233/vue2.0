@@ -111,3 +111,13 @@ export function administratorsmodifyRequest(val) {
     data
   })
 }
+
+// 修改员工信息
+export function ModifyEmployeeRequest(data) {
+  let id = data.id
+  return axios.request({
+    url: `/_api/admin/person/${id}/setProfile`,
+    method: 'POST',
+    data
+  })
+}

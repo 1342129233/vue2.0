@@ -23,6 +23,10 @@ import './icons'
 // 全局 Mock 接口
 import './mock'
 
+// vue-json-excel
+import JsonExcel from 'vue-json-excel'
+Vue.component('downloadExcel', JsonExcel)
+
 Vue.use(ElementUI, {
   size: 'medium',
   i18n: (key, value) => i18n.t(key, value)

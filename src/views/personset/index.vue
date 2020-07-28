@@ -50,7 +50,11 @@
           <el-breadcrumb-item>部门列表</el-breadcrumb-item>
         </el-breadcrumb>
         <el-button class='primary-btn marL10' @click="openDialog({row: null,tit: ''})">添加员工</el-button>
-        <el-button class='primary-btn'>批量导入员工</el-button>
+        <el-button class='primary-btn' @click="ExportEmployee">批量导出员工</el-button>
+        <!-- <download-excel class="primary-btn" :data="json_data"  name="员工.xls">
+          <el-button class='primary-btn' @click="ExportEmployee">批量导出员工</el-button>
+        </download-excel> -->
+        <el-button class='primary-btn' @click="Import">批量导入员工</el-button>
       </div>
       <el-table :data="newdepartmentList" row-key="id" :header-cell-style="{backgroundColor: '#F5F7FA'}" max-height="400">
         <el-table-column prop='' label='头像' align='center' width="150">
@@ -58,6 +62,7 @@
             <el-avatar shape="square" :size="50" src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png"></el-avatar>
           </template>
         </el-table-column>
+        <!-- <el-table-column prop='nickname' label='用户名' align='center' width="150"></el-table-column> -->
         <el-table-column prop='truename' label='真实姓名' align='center' width="150"></el-table-column>
         <el-table-column prop='verifiedMobile' label='手机号' align='center' width="150"></el-table-column>
         <el-table-column prop='did' label='部门' align='center' width="150"></el-table-column>
@@ -74,7 +79,7 @@
             <el-dropdown trigger="click">
               <el-button type='text'>更多<i class="el-icon-arrow-down el-icon--right"></i></el-button>
               <el-dropdown-menu>
-                <el-dropdown-item>修改信息</el-dropdown-item>
+                <el-dropdown-item @click.native="ModifyInformation(newdepartmentList.row, 2)">修改信息</el-dropdown-item>
                 <el-dropdown-item @click.native="optionpassworld(newdepartmentList.row)">修改密码</el-dropdown-item>
                 <el-dropdown-item @click.native="staffDeleteWang(newdepartmentList.row)">删除员工</el-dropdown-item>
               </el-dropdown-menu>
@@ -97,6 +102,7 @@
         </el-pagination>
       </div>
     </div>
+    <!-- 添加人员 -->
     <el-dialog :title="dialogTit" :visible.sync="dialogFormVisible">
       <el-form :model="personCre">
         <el-form-item label="用户名" label-width="120px">
@@ -116,6 +122,9 @@
         </el-form-item>
         <el-form-item label="拼音" label-width="120px">
           <el-input v-model="personCre.pinyin" :style="{width: '400px'}" class='input-focus'></el-input>
+        </el-form-item>
+        <el-form-item label="身份证号" label-width="120px">
+          <el-input v-model="personCre.idcard" :style="{width: '400px'}" class='input-focus'></el-input>
         </el-form-item>
         <el-form-item label="批次分类" label-width="120px">
           <el-input v-model="personCre.batch_tag" :style="{width: '400px'}" class='input-focus'></el-input>
@@ -153,8 +162,8 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="closeDialog(false)" class='default-btn'>取 消</el-button>
-        <el-button type="primary" @click="closeDialog(true)" class='primary-btn' :loading="addLoading">{{isRevise?'修改':'添加'}}</el-button>
+        <el-button @click="iscloseDialog(false)" class='default-btn'>取 消</el-button>
+        <el-button type="primary" @click="closeDialog(false)" class='primary-btn' :loading="addLoading">{{isRevise?'修改':'添加'}}</el-button>
       </div>
     </el-dialog>
     <el-dialog title="修改密码" :visible.sync="passworldFormVisible">
@@ -169,6 +178,61 @@
       <div slot="footer" class="dialog-footer">
         <el-button @click="ispassworldClose(false)">取 消</el-button>
         <el-button type="primary" @click="passworldClose(false)">确 定</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog
+      title="导入员工"
+      :visible.sync="ImportEmployees"
+      width="30%"
+      center>
+      <el-upload
+        class="upload-demo"
+        action="https://dev2.hse365.cc/_api/admin/person/importUser"
+        :headers="{'token':token}"
+        :on-preview="handlePreview"
+        :on-remove="handleRemove"
+        :file-list="fileList"
+        :on-success="handsuccessfile"
+        :on-error="handerrorfile"
+        list-type="picture"
+         name="excel">
+        <el-button size="small" type="primary">点击上传</el-button>
+        <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+      </el-upload>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="ImportEmployees = false">取 消</el-button>
+        <el-button type="primary" @click="ImportEmployeessuccess">确 定</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog :title="dialogTit" :visible.sync="Modifyelem">
+      <el-form :model="xiougaidata">
+        <el-form-item label="用户名" label-width="120px">
+          <el-input v-model="xiougaidata.nickname" :style="{width: '400px'}" class='input-focus'></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" label-width="120px">
+          <el-input v-model="xiougaidata.verifiedMobile" :style="{width: '400px'}" class='input-focus' maxlength="11"></el-input>
+        </el-form-item>
+        <el-form-item label="真实姓名" label-width="120px">
+          <el-input v-model="xiougaidata.truename" :style="{width: '400px'}" class='input-focus'></el-input>
+        </el-form-item>
+        <el-form-item label="拼音" label-width="120px">
+          <el-input v-model="xiougaidata.pinyin" :style="{width: '400px'}" class='input-focus'></el-input>
+        </el-form-item>
+        <el-form-item label="身份证号" label-width="120px">
+          <el-input v-model="xiougaidata.idcard" :style="{width: '400px'}" class='input-focus'></el-input>
+        </el-form-item>
+        <el-form-item label="批次分类" label-width="120px">
+          <el-input v-model="xiougaidata.batch_tag" :style="{width: '400px'}" class='input-focus'></el-input>
+        </el-form-item>
+        <el-form-item label="性别" label-width="120px">
+          <el-radio v-model="xiougaidata.gender" label="male">男</el-radio>
+          <el-radio v-model="xiougaidata.gender" label="female">女</el-radio>
+          <el-radio v-model="xiougaidata.gender" label="secret">保密</el-radio>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="isModifyelemClone(false)">取 消</el-button>
+        <el-button type="primary" @click="ModifyelemClone">确 定</el-button>
       </div>
     </el-dialog>
     <Deptworkjobper
@@ -187,6 +251,7 @@
 import { mapActions, mapState } from 'vuex'
 import Deptproocc from '../common/deptproocc.vue'
 import Deptworkjobper from '../common/deptworkjobper'  // 模板
+import { getToken } from '@/common/auth'
 export default {
   name: 'departmentset',
   components: {
@@ -195,12 +260,17 @@ export default {
   },
   data() {
     return {
+      // 上传文件
+      fileList: [],
+      token: '',
       total: 1, // 总条数
       FYsize: 10, // 分页每页多少条
       currentPage: 1,  // 当前页数
       newdepartmentList: [], // 部门列表数据
       dialogFormVisible: false, // dialog显示隐藏
       passworldFormVisible: false, // 修改密码隐藏显示
+      Modifyelem: false, // 修改员工
+      ImportEmployees: false,  // 导入员工
       dialogTit: '添加部门', // dialog title
       addLoading: false, // 添加部门loading
       // 修改密码回显
@@ -237,7 +307,19 @@ export default {
         batch_tag: '',
         did: '',
         pid: [],
-        gid: []
+        gid: [],
+        idcard: ''
+      },
+      // 修改员工
+      xiougaidata: {
+        pinyin: '',
+        id: '',
+        verifiedMobile: '',
+        truename: '',
+        nickname: '',
+        idcard: '',
+        gender: '',
+        batch_tag: ''
       },
       // 弹框的当前信息
       tableData: {},
@@ -245,12 +327,87 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['getDepartmentList', 'addStaff', 'reviseDepartmentInfo', 'deleteDepartment', 'setProOcc', 'setEmployeelist', 'Renbgg', 'staffDelete', 'administratorsmodify']),
+    ...mapActions(['getDepartmentList', 'addStaff', 'reviseDepartmentInfo', 'deleteDepartment', 'setProOcc', 'setEmployeelist', 'Renbgg', 'staffDelete', 'administratorsmodify', 'ExportEmployeelist', 'ImportStaff', 'ModifyEmployeeify']),
     openSetDeptProOccDialog(index, data) {
       this.outerVisible = true
       this.tableData = data
       this.showis = true
     },
+    // 修改信息
+    ModifyInformation(row) {
+      this.dialogTit = '修改人员信息'
+      let data = {
+        pinyin: row.pinyin,
+        id: row.id,
+        verifiedMobile: row.verifiedMobile,
+        truename: row.truename,
+        nickname: row.nickname,
+        idcard: row.idcard,
+        gender: row.gender,
+        batch_tag: row.batch_tag
+      }
+      this.xiougaidata = data
+      this.Modifyelem = true
+    },
+    isModifyelemClone(val) {
+      this.Modifyelem = val
+    },
+    ModifyelemClone() {
+      if(this.verificationsong()) {
+        this.ModifyEmployeeify(this.xiougaidata).then(data => {
+          if(data.data.msg === 'success') {
+            this.$message({type: 'success', message: '修改成功'})
+            this.handleCurrentChange()
+            this.Modifyelem = false
+          }else{
+            this.$message({type: 'success', message: '请从新修改'})
+          }
+        })
+      }
+
+      // this.Modifyelem = false
+    },
+    // 导入员工
+    Import() {
+      this.ImportEmployees = true
+    },
+    // 开始导入
+    KSImportEmployees() {
+      // this.ImportStaff(this.fileList)
+      // this.ImportEmployees = false
+    },
+    handleRemove(file, fileList) {
+      console.log(file, fileList)
+    },
+    handlePreview(file) {
+
+    },
+    handsuccessfile(response) {
+      let data = response.data.allUserData
+      let len = response.data.errorInfo
+      if(len.length <= 0) {
+        this.ImportStaff(data).then((data) => {
+          this.$message({type: 'success', message: data.data.msg})
+        })
+      }
+    },
+    handerrorfile(err) {
+      this.$message({type: 'warning', message: err})
+    },
+    ImportEmployeessuccess() {
+      this.ImportEmployees = false
+      this.fileList = []
+    },
+    // 导出员工列表
+    ExportEmployee() {
+      let num = {
+        export: 'y'
+      }
+      this.ExportEmployeelist(num).then(data => {
+        console.log(data)
+      })
+    },
+    // 提示框
     open(val, title) {
       this.$alert(val, title, {
         dangerouslyUseHTMLString: true
@@ -293,7 +450,7 @@ export default {
             this.$message({type: 'success', message: '修改成功'})
             this.passworldmodify.oldpassworld = ''
             this.passworldmodify.newpassworld = ''
-            this.passworldmodify.id= ''
+            this.passworldmodify.id = ''
           }
         })
       }
@@ -310,8 +467,7 @@ export default {
 
     },
     // 分页  当前第几页
-    handleCurrentChange(val) {
-      this.currentPage = val
+    handleCurrentChange() {
       let num = {
         page: this.currentPage,
         did: this.deptName[0],
@@ -351,6 +507,9 @@ export default {
       }else if(jc.pinyin === '') {
         this.$message({type: 'warning', message: '拼音不能为空'})
         return false
+      }else if(!jc.idcard || !/^\d{6}(18|19|20)?\d{2}(0[1-9]|1[012])(0[1-9]|[12]\d|3[01])\d{3}(\d|X)$/i.test(jc.idcard)) {
+        this.$message({type: 'warning', message: '身份证号不正确'})
+        return false
       }else if(jc.batch_tag === '') {
         this.$message({type: 'warning', message: '批次分类不能为空'})
         return false
@@ -365,6 +524,31 @@ export default {
         return false
       }else if(jc.password !== jc.password2) {
         this.$message({type: 'warning', message: '请保证两次输入的密码一直'})
+        return false
+      }else {
+        return true
+      }
+    },
+    verificationsong() {
+      let jc = this.xiougaidata
+      let reg = /^1[0-9]{10}$/
+      if(jc.nickname === '') {  //
+        this.$message({type: 'warning', message: '账号不能为空'})
+        return false
+      }else if(jc.verifiedMobile === '' || jc.verifiedMobile.length <= 10 || !reg.test(jc.verifiedMobile)) {  //
+        this.$message({type: 'warning', message: '请输入正确的手机号码'})
+        return false
+      }else if(jc.truename === '') {  //
+        this.$message({type: 'warning', message: '真实姓名不能为空'})
+        return false
+      }else if(jc.pinyin === '') {   //
+        this.$message({type: 'warning', message: '拼音不能为空'})
+        return false
+      }else if(!jc.idcard || !/^\d{6}(18|19|20)?\d{2}(0[1-9]|1[012])(0[1-9]|[12]\d|3[01])\d{3}(\d|X)$/i.test(jc.idcard)) {  //
+        this.$message({type: 'warning', message: '身份证号不正确'})
+        return false
+      }else if(jc.batch_tag === '') {   //
+        this.$message({type: 'warning', message: '批次分类不能为空'})
         return false
       }else {
         return true
@@ -400,58 +584,93 @@ export default {
       }
     },
     // 关闭dialog
-    closeDialog(dialogFormVisible) {
-      if(dialogFormVisible) {
-        this.addLoading = true
-        if(this.isRevise) {
-          this.reviseDepartmentInfo(this.departmentInfo).then(({data}) => {
-            this.dialogFormVisible = false
+    iscloseDialog(val) {
+      this.dialogFormVisible = false
+    },
+    closeDialog(val) {
+      console.log(this.personCre)
+      if(this.verification()) {
+        this.personCre.did = this.personCre.did[0]
+        this.addStaff(this.personCre).then((data) => {
+          if(data.code !== 0) {
+            this.$message.error(data.msg)
+          }else{
             this.addLoading = false
-            // 换
-            this.setEmployeelist().then(({data}) => {
-              this.newdepartmentList = data.data
-            })
+            this.dialogFormVisible = false
+            this.$message.success('添加成功')
+            this.personCre = {
+              nickname: '',
+              password: '',
+              password2: '',
+              verifiedMobile: '',
+              truename: '',
+              pinyin: '',
+              batch_tag: '',
+              did: '',
+              pid: [],
+              gid: [],
+              idcard: ''
+            }
+          }
+          this.setEmployeelist().then(({data}) => {
+            this.newdepartmentList = data.data
           }).catch(() => {
             this.dialogFormVisible = false
           })
-        }else{
-          // 判定是否为空，再次输出密码是不是一样的
-          if(this.verification()) {
-            this.personCre.did = this.personCre.did[0]
-            this.addStaff(this.personCre).then((data) => {
-              if(data !== 0) {
-                this.$message.error(data.msg)
-              }else{
-                this.addLoading = false
-                this.dialogFormVisible = false
-                this.$message.success('添加成功')
-                this.personCre = {
-                  nickname: '',
-                  password: '',
-                  password2: '',
-                  verifiedMobile: '',
-                  truename: '',
-                  pinyin: '',
-                  batch_tag: '',
-                  did: '',
-                  pid: [],
-                  gid: []
-                }
-              }
-              this.setEmployeelist().then(({data}) => {
-                this.newdepartmentList = data.data
-              })
-            }).catch(() => {
-              this.dialogFormVisible = false
-            })
-          } else {
-            this.addLoading = false
-          }
-        }
-      }else{
-        this.dialogFormVisible = dialogFormVisible
-        this.addLoading = false
+        })
       }
+      // if(dialogFormVisible) {
+      //   this.addLoading = true
+      //   if(this.isRevise) {
+      //     this.reviseDepartmentInfo(this.departmentInfo).then(({data}) => {
+      //       this.dialogFormVisible = false
+      //       this.addLoading = false
+      //       // 换
+      //       this.setEmployeelist().then(({data}) => {
+      //         this.newdepartmentList = data.data
+      //       })
+      //     }).catch(() => {
+      //       this.dialogFormVisible = false
+      //     })
+      //   }else{
+      //     // 判定是否为空，再次输出密码是不是一样的
+      //     if(this.verification()) {
+      //       this.personCre.did = this.personCre.did[0]
+      //       this.addStaff(this.personCre).then((data) => {
+      //         if(data !== 0) {
+      //           this.$message.error(data.msg)
+      //         }else{
+      //           this.addLoading = false
+      //           this.dialogFormVisible = false
+      //           this.$message.success('添加成功')
+      //           this.personCre = {
+      //             nickname: '',
+      //             password: '',
+      //             password2: '',
+      //             verifiedMobile: '',
+      //             truename: '',
+      //             pinyin: '',
+      //             batch_tag: '',
+      //             did: '',
+      //             pid: [],
+      //             gid: [],
+      //             idcard: ''
+      //           }
+      //         }
+      //         this.setEmployeelist().then(({data}) => {
+      //           this.newdepartmentList = data.data
+      //         })
+      //       }).catch(() => {
+      //         this.dialogFormVisible = false
+      //       })
+      //     } else {
+      //       this.addLoading = false
+      //     }
+      //   }
+      // }else{
+      //   this.dialogFormVisible = dialogFormVisible
+      //   this.addLoading = false
+      // }
     },
     // 筛选
     sift() {
@@ -589,6 +808,9 @@ export default {
       // console.log(data)
       // this.newdepartmentList = data.data
     })
+  },
+  beforeMount() {
+    this.token = getToken()
   }
 }
 </script>

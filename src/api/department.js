@@ -1,4 +1,5 @@
 import axios from '@/utils/api.request'
+import { getToken } from '@/common/auth'
 
 const _api = '_api'
 // 获取部门列表
@@ -52,6 +53,30 @@ export function setEmployeelistRequest(num) {
 export function addStaffRequest(data) {
   return axios.request({
     url: `/${_api}/admin/person/cre`,
+    method: 'POST',
+    data
+  })
+}
+
+// 导出员工列表
+export function ExportEmployeeRequest() {
+  // let data = num
+  window.location.href = 'https://dev2.hse365.cc/_api/admin/person/list?export=' + 'y' + '&token=' + getToken()
+  // return axios.request({
+  //   url: `/${_api}/admin/person/list`,
+  //   method: 'POST',
+  //   data
+  // })
+}
+
+// 导入员工
+export function ImportStaffRequest(files) {
+  let data = {
+    data: files
+  }
+  console.log(data)
+  return axios.request({
+    url: `/${_api}/admin/person/importUserDo`,
     method: 'POST',
     data
   })

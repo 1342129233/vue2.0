@@ -53,8 +53,8 @@
       <el-tabs type="border-card" @tab-click="handleDeptTabsClick" class="tab-color" v-show="tabRadioCurrentValue === 'pro'">
         <el-tab-pane v-for="items in proTabs" :label="items.name" :name="items.id" :key="items.id" :pid="items.pid">
           <el-row>
-            <el-button type="text" class="text-btn marL10">取消全选</el-button>
-            <el-button type="text" class="text-btn">全选</el-button>
+            <el-button type="text" class="text-btn marL10" @click="ispidcontent">取消全选</el-button>
+            <el-button type="text" class="text-btn" @click="pidcontent">全选</el-button>
           </el-row>
           <!-- 数据 -->
           <!-- <el-badge v-for="item in items.children" :key="item.id" :value="0" :max="99" class="item">
@@ -69,8 +69,8 @@
       <el-tabs type="border-card" @tab-click="handleDeptTabsClick" class="tab-color" v-show="tabRadioCurrentValue === 'occ'">
         <el-tab-pane v-for="items in occTabs" :label="items.name" :name="items.id" :key="items.id" :pid="items.pid">
           <el-row>
-            <el-button type="text" class="text-btn marL10">取消全选</el-button>
-            <el-button type="text" class="text-btn">全选</el-button>
+            <el-button type="text" class="text-btn marL10" @click="isgidcontent">取消全选</el-button>
+            <el-button type="text" class="text-btn" @click="gidcontent">全选</el-button>
           </el-row>
           <!-- 数据 -->
           <!-- <el-badge v-for="item in items.children" :key="item.id" :value="0" :max="99" class="item">
@@ -205,6 +205,31 @@ export default {
         outerVisible: boo
       }
       this.$emit('closeOuterDialog', objParams)
+    },
+    // pid 全选
+    pidcontent() {
+      let professionPro = this.dept.profession
+      // this.tijiao.pid = []
+      this.tableData.pidArrs = []
+      for(let i = 0; i < professionPro.length; i++) {
+        this.tableData.pidArrs.push(professionPro[i].cid)
+      }
+    },
+    // pid 全取消
+    ispidcontent() {
+      this.tableData.pidArrs = []
+    },
+    // gid 全选
+    gidcontent() {
+      let occupationPro = this.dept.occupation
+      this.tableData.gidArrs = []
+      for(let i = 0; i < occupationPro.length; i++) {
+        this.tableData.gidArrs.push(occupationPro[i].cid)
+      }
+    },
+    // gid 全取消
+    isgidcontent() {
+      this.tableData.gidArrs = []
     },
     // 提交
     handleConfirmUseLayoutBtn() {

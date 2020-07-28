@@ -1,5 +1,5 @@
 import {uploadTokenResquest, getPCATreeRequest, getDeptProOccResquest, getPersonListRequest, getDeptModalListRequest,
-  cuDeptTemplateRequest, ryglbgg, setting, staffDeleteRequest, administratorsmodifyRequest} from '@/api/common'
+  cuDeptTemplateRequest, ryglbgg, setting, staffDeleteRequest, administratorsmodifyRequest, ModifyEmployeeRequest} from '@/api/common'
 // const SET_LOADING = 'SET_LOADING'
 const common = {
   state: {
@@ -164,6 +164,16 @@ const common = {
     administratorsmodify(_, val) {
       return new Promise((resolve, reject) => {
         administratorsmodifyRequest(val).then(data => {
+          return resolve(data)
+        }).catch(err => {
+          return reject(err)
+        })
+      })
+    },
+    // 修改员工信息
+    ModifyEmployeeify(_, val) {
+      return new Promise((resolve, reject) => {
+        ModifyEmployeeRequest(val).then(data => {
           return resolve(data)
         }).catch(err => {
           return reject(err)
