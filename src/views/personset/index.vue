@@ -7,7 +7,7 @@
     <el-card shadow='always' class='marT20'>
       <el-form :inline="true">
         <el-form-item label='部门选择' label-width='70px' class='from-item-marb0'>
-          <el-cascader :options="dept" :props="{ value: 'id', label: 'name'}" v-model="deptName" :show-all-levels="false"></el-cascader>
+          <el-cascader :options="yyglbgg_did" :props="{ value: 'id', label: 'name'}" v-model="deptName" :show-all-levels="false" clearable></el-cascader>
         </el-form-item>
         <el-form-item label='工种选择' label-width='70px' class='from-item-marb0'>
           <!-- <el-input label='工种选择' :style="{width: '170px'}" class='input-focus' v-model="pro"/> -->
@@ -16,7 +16,7 @@
               class="select-color"
               popper-class="select-options-color">
             <el-option
-              v-for="item in profession"
+              v-for="item in yyglbgg_gid"
               :key="item.cid"
               :label="item.name"
               :value="item.cid">
@@ -29,7 +29,7 @@
               class="select-color"
               popper-class="select-options-color">
             <el-option
-              v-for="item in occupation"
+              v-for="item in yyglbgg_pid"
               :key="item.cid"
               :label="item.name"
               :value="item.cid">
@@ -74,7 +74,7 @@
             <!-- <el-button type='text' class="text-btn">修改信息</el-button>
             <el-button type='text' class="text-btn">修改密码</el-button> -->
             <el-button type='text' class="text-btn" @click="openSetDeptProOccDialog(newdepartmentList.$index, newdepartmentList.row)">部门工种岗位设置</el-button>
-            <el-button type='text' class="text-btn">分配岗位组</el-button>
+            <el-button type='text' class="text-btn" @click="openSetDeptProOccdeptpost(newdepartmentList.row)">分配岗位组</el-button>
             <!-- <el-button type='text' class="error-text-btn">删除员工</el-button> -->
             <el-dropdown trigger="click">
               <el-button type='text'>更多<i class="el-icon-arrow-down el-icon--right"></i></el-button>
@@ -149,7 +149,7 @@
         <el-form-item label="岗位选择" label-width="120px">
           <el-select v-model="personCre.pid"
               multiple
-              clearable placeholder="请选择工种"
+              clearable placeholder="请选择岗位"
               class="select-color"
               popper-class="select-options-color">
             <el-option
@@ -245,21 +245,31 @@
       @closeOuterDialog="closeOuterDialog"
       :tabRadio="['dept','pro','occ']"
       ></Deptworkjobper>
+    <Deptpost
+      ref="deptpostclick"
+      :tableData="tableData"
+      :deptpostVisible="deptpostVisible"
+      @clospostrDialog="clospostrDialog"
+    ></Deptpost>
   </div>
 </template>
 <script>
 import { mapActions, mapState } from 'vuex'
 import Deptproocc from '../common/deptproocc.vue'
 import Deptworkjobper from '../common/deptworkjobper'  // 模板
+import Deptpost from '../common/deptpost'  // 分配岗位组
 import { getToken } from '@/common/auth'
 export default {
   name: 'departmentset',
   components: {
     Deptproocc,
-    Deptworkjobper
+    Deptworkjobper,
+    Deptpost
   },
   data() {
     return {
+      // 分配岗位组
+      deptpostVisible: false,
       // 上传文件
       fileList: [],
       token: '',
@@ -333,6 +343,16 @@ export default {
       this.tableData = data
       this.showis = true
     },
+    // 分配岗位组
+    openSetDeptProOccdeptpost(data) {
+      this.deptpostVisible = true
+      this.tableData = data
+      this.$refs.deptpostclick.$emit('setPostdept', this.tableData.id)
+    },
+    // 关闭分配岗位
+    clospostrDialog(val) {
+      this.deptpostVisible = val
+    },
     // 修改信息
     ModifyInformation(row) {
       this.dialogTit = '修改人员信息'
@@ -360,7 +380,7 @@ export default {
             this.handleCurrentChange()
             this.Modifyelem = false
           }else{
-            this.$message({type: 'success', message: '请从新修改'})
+            this.$message({type: 'warning', message: '请从新修改'})
           }
         })
       }
@@ -801,11 +821,10 @@ export default {
     this.setEmployeelist().then(({data}) => {
       this.total = +data.total
       this.newdepartmentList = data.data
-      console.log(this.newdepartmentList)
     })
 
     this.Renbgg().then(({data}) => {
-      // console.log(data)
+      console.log(data)
       // this.newdepartmentList = data.data
     })
   },

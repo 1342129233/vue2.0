@@ -74,9 +74,29 @@ export function ImportStaffRequest(files) {
   let data = {
     data: files
   }
-  console.log(data)
   return axios.request({
     url: `/${_api}/admin/person/importUserDo`,
+    method: 'POST',
+    data
+  })
+}
+
+// 分配岗位
+export function setPostRequest(id) {
+  return axios.request({
+    url: `/_api/admin/person/${id}/setPost`,
+    method: 'POST'
+  })
+}
+
+// 分配岗位权限提交
+export function setPostdoRequest(jurisdiction) {
+  let id = jurisdiction.id
+  let data = {
+    rolegroupId: jurisdiction.data
+  }
+  return axios.request({
+    url: `/_api/admin/person/${id}/setPostDo`,
     method: 'POST',
     data
   })

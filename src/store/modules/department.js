@@ -1,4 +1,4 @@
-import {getDepartmentListRequest, addDepartmentRequest, reviseDepartmentInfoRequest, deleteDepartmentRequest, setProOccRequest, setEmployeelistRequest, addStaffRequest, ExportEmployeeRequest, ImportStaffRequest} from '@/api/department'
+import {getDepartmentListRequest, addDepartmentRequest, reviseDepartmentInfoRequest, deleteDepartmentRequest, setProOccRequest, setEmployeelistRequest, addStaffRequest, ExportEmployeeRequest, ImportStaffRequest, setPostRequest, setPostdoRequest} from '@/api/department'
 const department = {
   state: {
     departmentList: [],
@@ -99,8 +99,25 @@ const department = {
       return new Promise((resolve, reject) => {
         addStaffRequest(personCre).then(({data}) => {
           return resolve(data)
-        }).then(err => {
+        }).catch(err => {
           return reject(err)
+        })
+      })
+    },
+    // 分配岗位
+    setPostStaff(_, id) {
+      return new Promise((resolve, reject) => {
+        setPostRequest(id).then((data) => {
+          return resolve(data)
+        }).catch(err => {
+          return reject(err)
+        })
+      })
+    },
+    setPostdoStaff(_, jurisdiction) {
+      return new Promise((resolve, reject) => {
+        setPostdoRequest(jurisdiction).then((data) => {
+          return resolve(data)
         }).catch(err => {
           return reject(err)
         })
