@@ -29,6 +29,7 @@
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item :command="{tit: 'departmentInfoRevise', scopeRow: scope.row}">部门信息修改</el-dropdown-item>
                 <el-dropdown-item :command="{tit: 'workCategorySet', scopeRow: scope.row}">工种岗位设置</el-dropdown-item>
+                <el-dropdown-item :command="{tit: 'Muovi', scopeRow: scope.row}">移动当前部门</el-dropdown-item>
                 <el-dropdown-item :command="{tit: 'deleteCurrentDepartment', scopeRow: scope.row}">删除当前部门</el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
@@ -58,34 +59,44 @@
         <el-button type="primary" @click="closeDialog(true)" class='primary-btn' :loading="addLoading">{{isRevise?'修改':'添加'}}</el-button>
       </div>
     </el-dialog>
-    <Deptproocc 
-      :outerVisible="outerVisible" 
+    <Deptproocc
+      :outerVisible="outerVisible"
       :FproCheckedId="proCheckedId"
       :FoccCheckedId="occCheckedId"
-      @closeDeptproocc="closeDeptproocc" 
+      @closeDeptproocc="closeDeptproocc"
       :tabRadio="['dept','pro','occ','person']"></Deptproocc>
-      <!-- <Deptworkjobper 
+      <!-- <Deptworkjobper
         :outerVisible="outerVisible"
         @closeOuterDialog="closeOuterDialog"
         :tabRadio="['dept','pro','occ','person']"
         :deptCheckItemProp.sync="deptCheckItemProp"
         @upDeptCheckItemProp="upDeptCheckItemProp"/> -->
+    <Deptmuovi
+      ref='dialogmuovi'
+      :dialogFormdeptmuovi="dialogFormdeptmuovi"
+      @ismuovi="ismuovi"
+      @cismuovi="cismuovi"
+    >
+    </Deptmuovi>
   </div>
 </template>
 <script>
 import { mapActions, mapState } from 'vuex'
 import Deptproocc from '../common/deptproocc.vue'
 import Deptworkjobper from '../common/deptworkjobper'
+import Deptmuovi from '../common/deptmuovi'
+// import Sortable from 'sortablejs'
 export default {
   name: 'departmentset',
   components: {
     Deptproocc,
-    Deptworkjobper
+    Deptworkjobper,
+    Deptmuovi
   },
   data() {
     return {
       // deptCheckItemProp: [],
-
+      dialogFormdeptmuovi: false,
       newdepartmentList: [], // 部门列表数据
       dialogFormVisible: false, // dialog显示隐藏
       dialogTit: '添加部门', // dialog title
@@ -106,6 +117,18 @@ export default {
   },
   methods: {
     ...mapActions(['getDepartmentList', 'addDepartment', 'reviseDepartmentInfo', 'deleteDepartment', 'setProOcc']),
+    // 打开部门移动
+    openmuovi(data) {
+      this.dialogFormdeptmuovi = true
+      let tableData = data
+      this.$refs.dialogmuovi.$emit('setPostdeptmuovi', tableData)
+    },
+    ismuovi(val) {
+      this.dialogFormdeptmuovi = val
+    },
+    cismuovi(val) {
+      this.dialogFormdeptmuovi = val
+    },
     // 弹出dialog
     openDialog({row, tit}) {
       this.dialogFormVisible = true
@@ -200,6 +223,9 @@ export default {
         case 'workCategorySet':
           this.openDeptproocc(scopeRow)
           break
+        case 'Muovi':
+          this.openmuovi(scopeRow)
+          break
         case 'deleteCurrentDepartment':
           this.isDeleteCurrentDepartment(scopeRow)
           break
@@ -263,6 +289,30 @@ export default {
         })
       })
     }
+    // 行拖拽
+    // rowDrop() {
+    //   const tbody = document.querySelector('.el-table__body-wrapper tbody')
+    //   const _this = this
+    //   Sortable.create(tbody, {
+    //     onEnd({ newIndex, oldIndex }) {
+    //       const currRow = _this.tableData.splice(oldIndex, 1)[0]
+    //       _this.tableData.splice(newIndex, 0, currRow)
+    //     }
+    //   })
+    // },
+    // 列拖拽
+    // columnDrop() {
+    //   const wrapperTr = document.querySelector('.el-table__header-wrapper tr')
+    //   this.sortable = Sortable.create(wrapperTr, {
+    //     animation: 180,
+    //     delay: 0,
+    //     onEnd: evt => {
+    //       const oldItem = this.dropCol[evt.oldIndex]
+    //       this.dropCol.splice(evt.oldIndex, 1)
+    //       this.dropCol.splice(evt.newIndex, 0, oldItem)
+    //     }
+    //   })
+    // }
   },
   computed: {
     ...mapState({
@@ -273,6 +323,8 @@ export default {
     this.getDepartmentList().then(({data}) => {
       this.newdepartmentList = data
     })
+    // this.rowDrop()
+    // this.columnDrop()
   }
 }
 </script>

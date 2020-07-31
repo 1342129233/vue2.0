@@ -68,7 +68,7 @@
         <el-table-column prop='did' label='部门' align='center' width="150"></el-table-column>
         <el-table-column prop='gid' label='工种' align='center' width="150"></el-table-column>
         <el-table-column prop='pid' label='岗位' align='center' width="150"></el-table-column>
-        <el-table-column prop='createdTime' label='加入时间' align='center' width="150"></el-table-column>
+        <el-table-column prop='createdTime' label='加入时间' align='center' width="150" :formatter="formatDate"></el-table-column>
         <el-table-column prop='' label='操作' align='center' width='200px' fixed="right">
           <template slot-scope="newdepartmentList">
             <!-- <el-button type='text' class="text-btn">修改信息</el-button>
@@ -254,6 +254,7 @@
   </div>
 </template>
 <script>
+import moment from 'moment'
 import { mapActions, mapState } from 'vuex'
 import Deptproocc from '../common/deptproocc.vue'
 import Deptworkjobper from '../common/deptworkjobper'  // 模板
@@ -342,6 +343,12 @@ export default {
       this.outerVisible = true
       this.tableData = data
       this.showis = true
+    },
+    // 时间戳转换
+    formatDate(row) {
+      let tim = Number(row.createdTime) * 1000
+      let date = moment(tim).format('YYYY-MM-DD')
+      return date
     },
     // 分配岗位组
     openSetDeptProOccdeptpost(data) {
@@ -435,16 +442,35 @@ export default {
     },
     // 删除员工
     staffDeleteWang(row) {
-      // console.log(row.id)
-      this.staffDelete(row.id)
-      .then(data => {
-        if(data.code === 0) {
-          this.open('删除成功', '员工消息')
-          this.setEmployeelist().then(({data}) => {
-            this.total = +data.total
-            this.newdepartmentList = data.data
-          })
-        }
+      // this.staffDelete(row.id)
+      this.$confirm(`您确定要删除<${row.nickname}>吗`, '提示', {
+        type: 'warning',
+        cancelButtonClass: 'default-btn',
+        confirmButtonClass: 'error-btn',
+        confirmButtonText: '删除'
+      })
+      .then(() => {
+        this.staffDelete(row.id)
+        .then(data => {
+          if(data.code === 0) {
+            this.open('删除成功', '员工消息')
+            this.setEmployeelist().then(({data}) => {
+              this.total = +data.total
+              this.newdepartmentList = data.data
+            })
+          }else{
+            this.$message({
+              type: 'error',
+              message: data.msg
+            })
+          }
+        })
+      })
+      .catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
       })
     },
     // 修改密码
@@ -702,7 +728,7 @@ export default {
         keyword: this.keyword
       }
       this.setEmployeelist(num).then(({data}) => {
-        console.log(data.data)
+        // console.log(data.data)
         this.total = +data.total
         this.newdepartmentList = data.data
       })
@@ -814,6 +840,7 @@ export default {
     })
   },
   mounted() {
+    console.log(moment(this.newdepartmentList.createdtimes).format('YYYY-MM-DD'))
     this.getDepartmentList().then(({data}) => {
       // this.newdepartmentList = data
       // console.log(data)

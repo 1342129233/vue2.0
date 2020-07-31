@@ -321,7 +321,7 @@ export default {
           if(!this.deptCheckedId.includes(item.id)) {
             this.deptCheckedId.push(item.id)
             this.tagDeptList.map(ite => {
-              console.log(ite)
+              // console.log(ite)
               if(pathArr.includes(ite.id)) {
                 ite.num = ite.num - 0 + childrenId.children.length
               }
@@ -419,8 +419,9 @@ export default {
     },
     // 部门选中
     deptIsChecked(checkId) {
+      // 查看是否有子元素
       if(checkId.children && checkId.children.length) {
-        let isDeptTabs = this.deptTabs.map(item => item.id !== checkId.id ? 'true' : 'false')
+        let isDeptTabs = this.deptTabs.map(item => item.id !== checkId.id ? 'true' : 'false')  // 判断导航是否有, 没有就是 true, 有就是 false
         if(!isDeptTabs.includes('false')) {
           let obj = {
             id: checkId.id,
@@ -428,16 +429,17 @@ export default {
             pid: checkId.pid,
             path: checkId.path
           }
-          let isFalse = checkId.children.map(tem => tem.id === checkId.id ? 'true' : 'false')
+          let isFalse = checkId.children.map(tem => tem.id === checkId.id ? 'true' : 'false')  // 一级元素等于不等于子元素id  false
           if(!isFalse.includes('true')) {
             checkId.children.unshift(obj)
           }
           this.deptTabs.push(checkId)
         }
-        this.defaultDeptTabsValue = checkId.id
-      }else{
+        // console.log(this.deptTabs)
+        this.defaultDeptTabsValue = checkId.id  // 默认选中部门
+      }else{  // 没有子元素
         let pathArr = checkId.path.split('|')
-        if(this.deptCheckedId.includes(checkId.id)) {
+        if(this.deptCheckedId.includes(checkId.id)) {   // this.deptCheckedId 部门选中ID false
           this.deptCheckedId.map((item, ind) => {
             if(item === checkId.id) {
               this.deptCheckedId.splice(ind, 1)
@@ -454,7 +456,7 @@ export default {
           })
         }else{
           this.deptCheckedId.push(checkId.id)
-          this.tagDeptList.map(item => {
+          this.tagDeptList.map(item => {    // tags展示list
             if(pathArr.includes(item.id) && item.id !== checkId.id) {
               if(item.num) {
                 item.num += 1
@@ -505,7 +507,6 @@ export default {
         this.tagDeptList = data.dept || []
         this.newProfession = data.profession
         this.newOccupation = data.occupation
-        this.quTagDeptList(data.dept)
       })
       // 调取人员列表
       this.getPersonList(this.personParams)

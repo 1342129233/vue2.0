@@ -83,7 +83,7 @@ export function setting(val) {
     gid: val.gid || [],
     pid: val.pid || []
   }
-  console.log(data)
+  // console.log(data)
   return axios.request({
     url: `/_api/admin/person/${data.id}/setting`,
     method: 'POST',

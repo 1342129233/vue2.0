@@ -101,7 +101,7 @@ class HttpRequest {
     const instance = axios.create({  // 请求时长
       timeout: 15000
     })
-    // instance.defaults.headers.common['Access-Control-Allow-Origin'] = '*'
+    instance.defaults.headers.common['Access-Control-Allow-Origin'] = '*'
     options = Object.assign(this.getInsideConfig(), options)    // 合并两个对象
     // instance.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'  // 请求头  enctype="multipart/form-data"
     instance.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;multipart/form-data'

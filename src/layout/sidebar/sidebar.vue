@@ -9,7 +9,7 @@
       :collapse="isCollapse">
       <sidebar-item v-for="router of routers" :key="router.path" :item="router" :base-path="router.path"></sidebar-item>
     </el-menu>
-  </div>  
+  </div>
 </template>
 <script>
   import { mapGetters } from 'vuex'

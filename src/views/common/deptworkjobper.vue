@@ -41,7 +41,7 @@
         <el-radio-button label="person" v-if="tabRadio.includes('person')">人员</el-radio-button>
       </el-radio-group>
       <!-- 部门content -->
-      <el-tabs v-model="defaultDeptTabsValue" type="border-card" @tab-click="handleDeptTabsClick" class="tab-color" v-show="tabRadioCurrentValue === 'dept'" editable @tab-remove="removeTab">
+      <el-tabs v-model="defaultDeptTabsValue" type="border-card" @tab-click="handleDeptTabsClickdept" class="tab-color" v-show="tabRadioCurrentValue === 'dept'" @tab-remove="removeTab">
         <el-tab-pane v-for="items in deptTabs" :label="items.name" :name="items.id" :key="items.id" :pid="items.pid">
           <!-- 数据 -->
           <span v-for="item in items.children" :key="item.id" >
@@ -49,37 +49,46 @@
           </span>
         </el-tab-pane>
       </el-tabs>
+      <!-- 字母 -->
+      <el-menu mode="horizontal" background-color="#F5F7FA" active-text-color="#38A28A" @select="handleSelect"
+      :default-active="PYDefaultValue" v-if="tabRadioCurrentValue === 'pro' || tabRadioCurrentValue === 'occ'">
+        <el-menu-item v-for="item in PYArr" :key="item.index" :index="item.index">{{item.text}}</el-menu-item>
+        <!-- <el-menu-item index="0">所有</el-menu-item>
+        <el-menu-item index="1">AB</el-menu-item>
+        <el-menu-item index="2">CD</el-menu-item>
+        <el-menu-item index="3">EFG</el-menu-item>
+        <el-menu-item index="4">HJ</el-menu-item>
+        <el-menu-item index="5">KL</el-menu-item>
+        <el-menu-item index="6">MNO</el-menu-item>
+        <el-menu-item index="7">PQR</el-menu-item>
+        <el-menu-item index="8">STW</el-menu-item>
+        <el-menu-item index="9">XYZ</el-menu-item>
+        <el-menu-item index="#">#</el-menu-item> -->
+      </el-menu>
       <!-- 工种content -->
-      <el-tabs type="border-card" @tab-click="handleDeptTabsClick" class="tab-color" v-show="tabRadioCurrentValue === 'pro'">
-        <el-tab-pane v-for="items in proTabs" :label="items.name" :name="items.id" :key="items.id" :pid="items.pid">
-          <el-row>
-            <el-button type="text" class="text-btn marL10" @click="ispidcontent">取消全选</el-button>
-            <el-button type="text" class="text-btn" @click="pidcontent">全选</el-button>
-          </el-row>
-          <!-- 数据 -->
-          <!-- <el-badge v-for="item in items.children" :key="item.id" :value="0" :max="99" class="item">
-            <el-button size='mini' :class="deptCheckedId.includes(item.id)?'default-btn default-btn-active':'default-btn'" @click="deptIsChecked(item)">{{item.name}}</el-button>
-          </el-badge> -->
-          <span v-for="item in items.children" :key="item.id" >
-            <el-button style="margin: 5px" :type="tableData.pidArrs.indexOf(item.cid) != -1?'danger':''" @click="proClick(item.cid)">{{item.name}}</el-button>
-          </span>
-        </el-tab-pane>
+      <el-tabs type="border-card" class="tab-color" v-show="tabRadioCurrentValue === 'pro'">
+        <el-row>
+          <el-button type="text" class="text-btn marL10" @click="ispidcontent">取消全选</el-button>
+          <el-button type="text" class="text-btn" @click="pidcontent">全选</el-button>
+        </el-row>
+        <!-- 数据 -->
+        <!-- <el-badge v-for="item in items.children" :key="item.id" :value="0" :max="99" class="item">
+          <el-button size='mini' :class="deptCheckedId.includes(item.id)?'default-btn default-btn-active':'default-btn'" @click="deptIsChecked(item)">{{item.name}}</el-button>
+        </el-badge> -->
+        <span v-for="item in newProfession" :key="item.id" >
+          <el-button style="margin: 5px" :type="tableData.pidArrs.indexOf(item.cid) != -1?'danger':''" @click="proClick(item.cid)">{{item.name}}</el-button>
+        </span>
       </el-tabs>
       <!-- 岗位content -->
-      <el-tabs type="border-card" @tab-click="handleDeptTabsClick" class="tab-color" v-show="tabRadioCurrentValue === 'occ'">
-        <el-tab-pane v-for="items in occTabs" :label="items.name" :name="items.id" :key="items.id" :pid="items.pid">
-          <el-row>
-            <el-button type="text" class="text-btn marL10" @click="isgidcontent">取消全选</el-button>
-            <el-button type="text" class="text-btn" @click="gidcontent">全选</el-button>
-          </el-row>
-          <!-- 数据 -->
-          <!-- <el-badge v-for="item in items.children" :key="item.id" :value="0" :max="99" class="item">
-            <el-button size='mini' :class="deptCheckedId.includes(item.id)?'default-btn default-btn-active':'default-btn'" @click="deptIsChecked(item)">{{item.name}}</el-button>
-          </el-badge> -->
-          <span v-for="item in items.children" :key="item.id" >
-            <el-button style="margin: 5px" :type="tableData.gidArrs.indexOf(item.cid) != -1?'danger':''" @click="occClick(item.cid)">{{item.name}}</el-button>
-          </span>
-        </el-tab-pane>
+      <el-tabs type="border-card" class="tab-color" v-show="tabRadioCurrentValue === 'occ'">
+        <el-row>
+          <el-button type="text" class="text-btn marL10" @click="isgidcontent">取消全选</el-button>
+          <el-button type="text" class="text-btn" @click="gidcontent">全选</el-button>
+        </el-row>
+        <!-- 数据 -->
+        <span v-for="item in newOccupation" :key="item.id" >
+          <el-button style="margin: 5px" :type="tableData.gidArrs.indexOf(item.cid) != -1?'danger':''" @click="occClick(item.cid)">{{item.name}}</el-button>
+        </span>
       </el-tabs>
       <!-- 外部dialog footer -->
       <div slot="footer" class="dialog-footer">
@@ -132,21 +141,21 @@ export default {
       ],
       // 工种tabs
       proTabs: [
-        {
-          name: '全部',
-          id: '0',
-          children: [],
-          pid: '-1'
-        }
+        // {
+        //   name: '全部',
+        //   id: '0',
+        //   children: [],
+        //   pid: '-1'
+        // }
       ],
       // 岗位tabs
       occTabs: [
-        {
-          name: '全部',
-          id: '0',
-          children: [],
-          pid: '-1'
-        }
+        // {
+        //   name: '全部',
+        //   id: '0',
+        //   children: [],
+        //   pid: '-1'
+        // }
       ],
       deptCheckedId: [], // 部门选中id
       // 提交的
@@ -155,6 +164,36 @@ export default {
         did: '',
         gid: [],
         pid: []
+      },
+      PYArr: [
+        {index: '0', text: '全部'},
+        {index: '1', text: 'AB'},
+        {index: '2', text: 'CD'},
+        {index: '3', text: 'EFG'},
+        {index: '4', text: 'HJ'},
+        {index: '5', text: 'KL'},
+        {index: '6', text: 'MNO'},
+        {index: '7', text: 'PQR'},
+        {index: '8', text: 'STW'},
+        {index: '9', text: 'XYZ'},
+        {index: '#', text: '#'}
+      ],
+      PYDefaultValue: '0',
+      newProfession: [], // 新的工种列表
+      newOccupation: [], // 新的岗位列表
+      selectionList: [],
+      PYObj: {
+        '0': {arr: ['*'], text: '全部'},
+        '1': {arr: ['A', 'B'], text: 'AB'},
+        '2': {arr: ['C', 'D'], text: 'CD'},
+        '3': {arr: ['E', 'F', 'G'], text: 'EFG'},
+        '4': {arr: ['H', 'J'], text: 'HJ'},
+        '5': {arr: ['K', 'L'], text: 'KL'},
+        '6': {arr: ['M', 'N', 'O'], text: 'MNO'},
+        '7': {arr: ['P', 'Q', 'R'], text: 'PQR'},
+        '8': {arr: ['S', 'T', 'W'], text: 'STW'},
+        '9': {arr: ['X', 'Y', 'Z'], text: 'XYZ'},
+        '#': {arr: ['#'], text: '#'}
       }
     }
   },
@@ -162,15 +201,21 @@ export default {
     // 初始化dept tabs列表 部门
     dept(newDept) {
       this.deptTabs[0].children = newDept.dept
-      this.proTabs[0].children = newDept.profession
-      this.occTabs[0].children = newDept.occupation
-      console.log(this.proTabs[0].children)
+      // this.proTabs = newDept.profession
+      // this.occTabs = newDept.occupation
+      // console.log(this.proTabs[0].children)
       // console.log(this.deptTabs[0].children.dept)
       // console.log(this.deptTabs[0].children.profession)
       // console.log(this.deptTabs[0].children.occupation)
     },
-    tabRadioCurrentValue(newName) {
-      this.tabRadioCurrentValue = newName
+    // tabRadioCurrentValue(newName) {
+    //   this.tabRadioCurrentValue = newName
+    // },
+    // 切换工种部门岗位
+    tabRadioCurrentValue(newTabRadioCurrentValue, oldTabRadioCurrentValue) {
+      if(newTabRadioCurrentValue === 'pro' || newTabRadioCurrentValue === 'occ') {
+        this.handleSelect(this.PYDefaultValue)
+      }
     },
     // 监听传过来的数值
     tableData: {
@@ -206,34 +251,85 @@ export default {
       }
       this.$emit('closeOuterDialog', objParams)
     },
+    handleSelect(key, keyPath) {
+      this.PYDefaultValue = key
+      this.newProfession = []
+      this.newOccupation = []
+      this.PYObj[key].arr.map(item => {
+        if(this.tabRadioCurrentValue === 'pro') {
+          this.profession.map(ite => {
+            if(item === ite.pinyin) {
+              this.newProfession.push(ite)
+            }else if(item === '#' && !ite.pinyin) {
+              this.newProfession.push(ite)
+            }else if(item === '*') {
+              this.newProfession = this.profession
+            }
+          })
+        }else if(this.tabRadioCurrentValue === 'occ') {
+          this.occupation.map(ite => {
+            if(item === ite.pinyin) {
+              this.newOccupation.push(ite)
+            }else if(item === '#' && !ite.pinyin) {
+              this.newOccupation.push(ite)
+            }else if(item === '*') {
+              this.newOccupation = this.occupation
+            }
+          })
+        }
+      })
+    },
+    // 部门级别切换
+    handleDeptTabsClickdept(tab, event) {
+      this.deptTabs.map((item, ind) => {
+        if(ind > tab.index) {
+          this.deptTabs.splice(ind, this.deptTabs.length)
+        }
+      })
+    },
     // pid 全选
     pidcontent() {
-      let professionPro = this.dept.profession
-      // this.tijiao.pid = []
+      let professionPro = this.newProfession
       this.tableData.pidArrs = []
       for(let i = 0; i < professionPro.length; i++) {
         this.tableData.pidArrs.push(professionPro[i].cid)
+        this.tijiao.pid.push(professionPro[i].cid)
       }
+      this.tijiao.pid = [...new Set(this.tijiao.pid)]
     },
     // pid 全取消
     ispidcontent() {
       this.tableData.pidArrs = []
+      this.tijiao.pid = []
     },
     // gid 全选
     gidcontent() {
-      let occupationPro = this.dept.occupation
+      let occupationPro = this.newOccupation
       this.tableData.gidArrs = []
       for(let i = 0; i < occupationPro.length; i++) {
         this.tableData.gidArrs.push(occupationPro[i].cid)
+        this.tijiao.gid.push(occupationPro[i].cid)
       }
+      this.tijiao.gid = [...new Set(this.tijiao.gid)]
     },
     // gid 全取消
     isgidcontent() {
       this.tableData.gidArrs = []
+      this.tijiao.gid = []
     },
     // 提交
     handleConfirmUseLayoutBtn() {
-      this.settinging(this.tijiao)
+      this.settinging(this.tijiao).then(data => {
+        let del = data.data.code
+        if(del === 0) {
+          this.$message({
+            message: '恭喜你，修改成功',
+            type: 'success'
+          })
+        }else{
+          this.$message.error('错了哦，修改失败')
+        }
+      })
     },
     // 部门级别切换
     handleDeptTabsClick(tab, event) {
@@ -325,7 +421,7 @@ export default {
           this.deptTabs.push(obj)
           this.defaultDeptTabsValue = checkItem.id
         }
-        console.log(this.deptTabs)
+        // console.log(this.deptTabs)
       }else{
         this.tableData.didId = checkItem.id
         this.tijiao.did = checkItem.id
@@ -365,13 +461,18 @@ export default {
     },
     // 调取部门/工种/岗位列表
     init() {
-      this.getDeptProOccList(this.tabRadio)
+      this.getDeptProOccList(this.tabRadio).then(({data}) => {
+        this.newProfession = data.profession
+        this.newOccupation = data.occupation
+      })
     }
   },
   computed: {
     ...mapState({
       // dept: state => state.common.deptProOccList.dept
-      dept: state => state.common.deptProOccList
+      dept: state => state.common.deptProOccList,
+      profession: state => state.common.deptProOccList.profession, // 工种列表
+      occupation: state => state.common.deptProOccList.occupation  // 岗位列表
       // occupation: state => state.common.deptProOccList.occupation,
       // profession: state => state.common.deptProOccList.profession
     })
