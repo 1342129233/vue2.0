@@ -1,4 +1,4 @@
-import {getDepartmentListRequest, addDepartmentRequest, reviseDepartmentInfoRequest, deleteDepartmentRequest, setProOccRequest, setEmployeelistRequest, addStaffRequest, ExportEmployeeRequest, ImportStaffRequest, setPostRequest, setPostdoRequest} from '@/api/department'
+import {getDepartmentListRequest, addDepartmentRequest, reviseDepartmentInfoRequest, deleteDepartmentRequest, setProOccRequest, setEmployeelistRequest, addStaffRequest, ExportEmployeeRequest, ImportStaffRequest, setPostRequest, setPostdoRequest, deptmoveRequest} from '@/api/department'
 const department = {
   state: {
     departmentList: [],
@@ -61,6 +61,16 @@ const department = {
     setProOcc(_, setProOccParams) {
       return new Promise((resolve, reject) => {
         setProOccRequest(setProOccParams).then(({data}) => {
+          return resolve(data)
+        }).catch(err => {
+          return reject(err)
+        })
+      })
+    },
+    // 移动工种岗位位置
+    deptmove(_, data) {
+      return new Promise((resolve, reject) => {
+        deptmoveRequest(data).then(({data}) => {
           return resolve(data)
         }).catch(err => {
           return reject(err)

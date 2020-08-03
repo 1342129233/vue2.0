@@ -101,3 +101,16 @@ export function setPostdoRequest(jurisdiction) {
     data
   })
 }
+// 移动工种岗位位置
+export function deptmoveRequest(datas) {
+  let did = datas.did
+  let data = {
+    id: datas.id
+  }
+  console.log(data)
+  return axios.request({
+    url: `/_api/admin/department/partmove/${did}`,
+    method: 'POST',
+    data
+  })
+}

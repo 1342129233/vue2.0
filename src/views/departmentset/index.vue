@@ -53,6 +53,9 @@
             class='input-focus'>
           </el-input>
         </el-form-item>
+        <el-form-item label="排序" label-width="120px">
+          <el-input v-model.trim="departmentInfo.sort" :style="{width: '400px'}" class='input-focus' oninput="value=value.replace(/^\.+|[^\d.]/g,'')"></el-input>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="closeDialog(false)" class='default-btn'>取 消</el-button>
@@ -74,6 +77,7 @@
     <Deptmuovi
       ref='dialogmuovi'
       :dialogFormdeptmuovi="dialogFormdeptmuovi"
+      :xiougai="xiougai"
       @ismuovi="ismuovi"
       @cismuovi="cismuovi"
     >
@@ -82,7 +86,7 @@
 </template>
 <script>
 import { mapActions, mapState } from 'vuex'
-import Deptproocc from '../common/deptproocc.vue'
+import Deptproocc from '../common/deptprooccCopy.vue'
 import Deptworkjobper from '../common/deptworkjobper'
 import Deptmuovi from '../common/deptmuovi'
 // import Sortable from 'sortablejs'
@@ -105,14 +109,16 @@ export default {
       departmentInfo: {
         pid: 0,
         name: '',
-        des: ''
+        des: '',
+        sort: 0
       },
       keyword: '', // 搜索关键字
       isRevise: false, // 是否是修改部门信息
       outerVisible: false, // 子组件dialogVisible
       setProOccDid: '0', // 要设置的工种岗位部门id
       proCheckedId: [],
-      occCheckedId: []
+      occCheckedId: [],
+      xiougai: ''  // 修改值
     }
   },
   methods: {
@@ -120,10 +126,16 @@ export default {
     // 打开部门移动
     openmuovi(data) {
       this.dialogFormdeptmuovi = true
-      let tableData = data
-      this.$refs.dialogmuovi.$emit('setPostdeptmuovi', tableData)
+      // let tableData = data
+      this.xiougai = data.did
+      // this.$refs.dialogmuovi.$emit('setPostdeptmuovi', tableData)
     },
     ismuovi(val) {
+      // 刷新数据
+      this.getDepartmentList().then(({data}) => {
+        this.newdepartmentList = data
+      })
+      // 关闭弹框
       this.dialogFormdeptmuovi = val
     },
     cismuovi(val) {
@@ -137,7 +149,8 @@ export default {
         this.departmentInfo = {
           pid: row.did,
           name: '',
-          des: ''
+          des: '',
+          sort: 0
         }
       }else if(tit === 'departmentInfoRevise') {
         this.isRevise = true
@@ -152,9 +165,24 @@ export default {
         this.departmentInfo = {
           pid: 0,
           name: '',
-          des: ''
+          des: '',
+          sort: 0
         }
       }
+    },
+    // 不能为空的限制
+    limit(datav) {
+      return new Promise((resolve, reject) => {
+        if(datav.name === '') {
+          this.$message.warning('部门名称出错')
+          this.addLoading = false
+        }else if(datav.des === '') {
+          this.$message.warning('部门简介出错')
+          this.addLoading = false
+        }else {
+          return resolve(datav)
+        }
+      })
     },
     // 关闭dialog
     closeDialog(dialogFormVisible) {
@@ -171,15 +199,25 @@ export default {
             this.dialogFormVisible = false
           })
         }else{
-          this.addDepartment(this.departmentInfo).then(({data}) => {
-            this.addLoading = false
-            this.dialogFormVisible = false
-            this.$message.success('添加成功')
-            this.getDepartmentList().then(({data}) => {
-              this.newdepartmentList = data
+          this.limit(this.departmentInfo).then(datav => {
+            this.addDepartment(this.departmentInfo).then((data) => {
+              this.addLoading = false
+              this.dialogFormVisible = false
+              if(data.code === 0) {
+                this.$message.success(data.data)
+              }else{
+                this.$message.error('添加失败')
+              }
+
+              this.getDepartmentList().then(({data}) => {
+                this.newdepartmentList = data
+              })
+            }).catch(() => {
+              this.dialogFormVisible = false
             })
           }).catch(() => {
-            this.dialogFormVisible = false
+            this.$message.warning('验证失败，请从新输入')
+            this.addLoading = false
           })
         }
       }else{
