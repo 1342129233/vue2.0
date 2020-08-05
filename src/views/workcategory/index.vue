@@ -38,56 +38,115 @@
             class='input-focus'>
           </el-input>
         </el-form-item>
+        <el-form-item label="排序" label-width="120px">
+          <el-input v-model="professionInfo.sort" :style="{width: '400px'}" class='input-focus'></el-input>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="closeDialog(false)" class='default-btn'>取 消</el-button>
         <el-button type="primary" @click="closeDialog(true)" class='primary-btn' :loading="addLoading">{{isRevise?'修改':'添加'}}</el-button>
       </div>
     </el-dialog>
+    <div></div>
   </div>
 </template>
 <script>
-import { mapActions } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 export default {
   name: 'workcategory',
   data() {
     return {
       newWorkcategoryList: [
-        {name: 'lalla', des: 'sajisn', id: '0'}
+        // {name: 'lalla', des: 'sajisn', id: '0'}
       ],
       dialogFormVisible: false,
       dialogTit: '添加工种',
       professionInfo: {
+        type: 1,
         name: '',
         des: '',
-        id: ''
+        id: '',
+        sort: 0
       },
       addLoading: false,
       isRevise: false
     }
   },
   methods: {
-    ...mapActions(['getProfessionList']),
+    ...mapActions(['addworktype', 'Renbgg', 'delworktype', 'modifyworktype']),
     openDialog(row) {
       this.dialogFormVisible = true
       this.professionInfo = {
         name: '',
         des: '',
-        id: ''
+        id: '',
+        type: 1,
+        sort: 0
       }
       if(row) {
         this.isRevise = true
         this.professionInfo = {
           name: row.name,
           des: row.des,
-          id: row.id
+          id: row.cid,
+          type: 1,
+          sort: row.sort
         }
       }else{
         this.isRevise = false
       }
     },
     closeDialog(boo) {
-      this.dialogFormVisible = false
+      if(boo === true) {
+        if(this.isRevise === false) {
+          let data = {
+            type: this.professionInfo.type,
+            name: this.professionInfo.name,
+            des: this.professionInfo.des,
+            sort: this.professionInfo.sort
+          }
+          if(data.name === '') {
+            this.$message({type: 'warning', message: '工种名称不能为空'})
+          }else{
+            this.addworktype(data).then(data => {
+              if(data.code === 0) {
+                this.Renbgg().then(({data}) => {
+                  this.newWorkcategoryList = data.profession
+                })
+                this.$message({type: 'success', message: '工种添加成功'})
+                this.dialogFormVisible = false
+              }else{
+                this.$message({type: 'error', message: data.msg})
+              }
+            })
+          }
+        }else if(this.isRevise === true) {
+          let data = {
+            type: this.professionInfo.type,
+            name: this.professionInfo.name,
+            cid: this.professionInfo.id,
+            des: this.professionInfo.des,
+            sort: this.professionInfo.sort
+          }
+          if(data.name === '') {
+            this.$message({type: 'warning', message: '工种名称不能为空'})
+          }else{
+            this.modifyworktype(data).then(data => {
+              if(data.code === 0) {
+                this.Renbgg().then(({data}) => {
+                  this.newWorkcategoryList = data.profession
+                })
+                this.$message({type: 'success', message: '工种修改成功'})
+                this.dialogFormVisible = false
+              }else{
+                this.$message({type: 'error', message: data.msg})
+              }
+            })
+          }
+        }
+      }else if(boo === false) {
+        this.dialogFormVisible = false
+      }
     },
     isDeleteCurrentPro(scopeRow) {
       this.$confirm(`您确定要删除<${scopeRow.name}>吗`, '提示', {
@@ -96,9 +155,24 @@ export default {
         confirmButtonClass: 'error-btn',
         confirmButtonText: '删除'
       }).then(() => {
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
+        // 删除方法
+        let data = {
+          cid: scopeRow.cid,
+          type: this.professionInfo.type
+        }
+        this.delworktype(data).then(data => {
+          if(data.code === 0) {
+            this.Renbgg().then(({data}) => {
+              this.newWorkcategoryList = data.profession
+            })
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+          }
+        })
+        .catch(() => {
+          this.$message({type: 'error', message: data.msg})
         })
       }).catch(() => {
         this.$message({
@@ -108,8 +182,15 @@ export default {
       })
     }
   },
-  mounted() {
-    // this.getProfessionList()
+  beforeMount() {
+    this.Renbgg().then(({data}) => {
+      this.newWorkcategoryList = data.profession
+    })
+  },
+  computed: {
+    ...mapState({
+      yyglbgg_pid: state => console.log(state.common.yyglbgg.pid)
+    })
   }
 }
 </script>

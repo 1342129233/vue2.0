@@ -7,6 +7,7 @@ import permission from './modules/permission'
 import common from './modules/common'
 import home from './modules/home'
 import department from './modules/department'
+import workcategory from './modules/workcategory'
 
 Vue.use(Vuex)
 
@@ -18,6 +19,7 @@ export default new Vuex.Store({
     permission,
     common,
     home,
-    department
+    department,
+    workcategory
   }
 })
