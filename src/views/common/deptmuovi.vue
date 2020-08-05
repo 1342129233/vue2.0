@@ -63,10 +63,15 @@ export default {
     // 初始化dept tabs列表 部门
     dept(newDept) {
       this.editabledid[0].children = newDept.dept
+    },
+    dialogFormdeptmuovi() {
+      if(this.dialogFormdeptmuovi === true) {
+        this.getDeptProOccList(['dept', 'pro', 'occ'])
+      }
     }
   },
   methods: {
-    ...mapActions(['getDepartmentList', 'deptmove']),
+    ...mapActions(['getDepartmentList', 'deptmove', 'getDeptProOccList']),
     deptclick(id) {
       if(this.tableButton.includes(id)) {
         this.tableButton = ''
@@ -83,12 +88,20 @@ export default {
       }
       if(dev.id === '') {
         this.$message.warning('选中部门不能为空')
-      }else {
+      }else if(dev.id === dev.did) {
+        this.$message.warning('请不要移动到自己部门下面')
+      }else{
         this.deptmove(dev).then((data) => {
           if(data.code === 0) {
             this.$message.success('移动成功')
             this.$emit('ismuovi', val)
           }
+          this.editableTabsValue = '0'
+          let so = {
+            index: this.editableTabsValue
+          }
+          this.handleDeptTabsClick(so)
+          this.tableData.didId = ''
         })
       }
     },

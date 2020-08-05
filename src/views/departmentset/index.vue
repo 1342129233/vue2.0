@@ -241,7 +241,7 @@ export default {
     // 递归查找返回path
     siftChild(children, itemPath) {
       children.map((item, ind) => {
-        if(item.name.indexOf(this.keyword) !== -1) {
+        if(item.name.indexOf(this.keyword) !== -1) {  // 存在
           itemPath.push(item.path.split('|')[1])
         }else{
           if(item.children && item.children.length) {

@@ -10,7 +10,7 @@
     <!-- 外部dialog -->
     <el-dialog :visible="outerVisible" :show-close="false">
       <!-- 设置模版 -->
-      <el-row :gutter="53" class="marB20">
+      <!-- <el-row :gutter="53" class="marB20">
         <el-col :span="18">
           <el-select
             v-model="deptWorkJobTemValue"
@@ -32,7 +32,7 @@
           <el-button class="default-btn">保存模版</el-button>
           <el-button type="danger">删除模版</el-button>
         </el-col>
-      </el-row>
+      </el-row> -->
       <!-- 部门/工种/岗位/人员 radio -->
       <el-radio-group v-model="tabRadioCurrentValue" class='marB20 radio-color'>
         <el-radio-button label="dept" v-if="tabRadio.includes('dept')">部门</el-radio-button>
