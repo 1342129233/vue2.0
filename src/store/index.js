@@ -8,6 +8,7 @@ import common from './modules/common'
 import home from './modules/home'
 import department from './modules/department'
 import workcategory from './modules/workcategory'
+import waiimg from './modules/waiimg'
 
 Vue.use(Vuex)
 
@@ -20,6 +21,7 @@ export default new Vuex.Store({
     common,
     home,
     department,
-    workcategory
+    workcategory,
+    waiimg
   }
 })

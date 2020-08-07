@@ -49,6 +49,12 @@ const home = [
         name: 'personset',
         component: () => import('@/views/personset'),
         meta: {title: '人员管理', icon: 'user-solid'}
+      },
+      {
+        path: 'rotation',
+        name: 'rotation',
+        component: () => import('@/views/rotation'),
+        meta: {title: '轮播图', icon: 'camera-solid'}
       }
     ]
   }

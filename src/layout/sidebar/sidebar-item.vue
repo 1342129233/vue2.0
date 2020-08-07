@@ -113,7 +113,7 @@ export default {
   background var(--hsegreen)
 .el-menu-item:focus
   background var(--hsegreen)
-.lay-nav-left >>> .el-menu-item i 
+.lay-nav-left >>> .el-menu-item i
   color var(--white)
 .lay-nav-left >>> .el-submenu__title
   color #ffffff
