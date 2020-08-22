@@ -73,7 +73,12 @@ class HttpRequest {
       if (res.data.code === 10001 || res.data.code === 10002) {
         // localStorage.removeItem('token')
         removeToken('token')
-        router.replace({ path: '/login' })
+        // console.log(router.history.current.path)
+        if(router.history.current.path === '/login') {
+
+        }else {
+          router.replace({ path: '/login' })
+        }
       }else if(res.headers.new_token) {
         // 更新token
         setToken(res.headers.new_token)
@@ -101,12 +106,13 @@ class HttpRequest {
     const instance = axios.create({  // 请求时长
       timeout: 15000
     })
+    // options 是请求地址，例如："/_api/admin/picture/create"
     instance.defaults.headers.common['Access-Control-Allow-Origin'] = '*'
     options = Object.assign(this.getInsideConfig(), options)    // 合并两个对象
     // instance.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'  // 请求头  enctype="multipart/form-data"
     instance.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;multipart/form-data'
     instance.defaults.headers.post['enctype'] = 'multipart/form-data'
-    this.interceptors(instance, options.url)
+    this.interceptors(instance, options.url)  // (拦截, 请求地址)
     return instance(options)
   }
 }

@@ -56,7 +56,7 @@
         </download-excel> -->
         <el-button class='primary-btn' @click="Import">批量导入员工</el-button>
       </div>
-      <el-table :data="newdepartmentList" row-key="id" :header-cell-style="{backgroundColor: '#F5F7FA'}" max-height="400">
+      <el-table :data="newdepartmentList" row-key="id" :header-cell-style="{backgroundColor: '#F5F7FA'}" max-height="500">
         <el-table-column prop='' label='头像' align='center' width="150">
           <template>
             <el-avatar shape="square" :size="50" src="https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png"></el-avatar>
@@ -632,9 +632,9 @@ export default {
     // 关闭dialog
     iscloseDialog(val) {
       this.dialogFormVisible = false
+      this.ersonCre.did = ''
     },
     closeDialog(val) {
-      console.log(this.personCre)
       if(this.verification()) {
         this.personCre.did = this.personCre.did[0]
         this.addStaff(this.personCre).then((data) => {
@@ -660,7 +660,9 @@ export default {
           }
           this.setEmployeelist().then(({data}) => {
             this.newdepartmentList = data.data
+            this.ersonCre.did = ''
           }).catch(() => {
+            this.ersonCre.did = ''
             this.dialogFormVisible = false
           })
         })

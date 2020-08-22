@@ -47,8 +47,10 @@ const user = {
     [SET_USERINFO](state, user) {
       state.name = user.show_name
       state.avatar = user.mediumAvatar
+      console.log(user)
       saveToLocal('name', user.show_name)
       saveToLocal('avatar', user.mediumAvatar)
+      saveToLocal('is_admin', user.is_admin)
     },
     [SET_MANAGE_EID](state, manageEid) {
       state.manage_eid = manageEid
@@ -99,14 +101,20 @@ const user = {
     login({ commit }, userInfo) {
       return new Promise((resolve, reject) => {
         login(userInfo).then(({ data }) => {
-          console.log(data)
           if (data.code === 0) {
+            commit('SET_LOADING', false)
             setToken(data.data.token)
             commit(SET_TOKEN, data.data.token)     // 存 token
             commit(SET_USERINFO, data.data.user)   // 存账号密码
             return resolve(data)
+          }else{
+            Message.error(data.msg)
+            commit('SET_LOADING', false)
+            return resolve(data)
           }
         }).catch(err => {
+          // console.log(用户不存在)
+          commit('SET_LOADING', false)
           return reject(err)
         })
       })
@@ -214,6 +222,7 @@ const user = {
     getCompanylist({commit}, keyword) {
       return new Promise((resolve, reject) => {
         companylistRequest(keyword).then(({data}) => {
+          console.log(data)
           commit('SET_COMPANYLIST', data.data)
           return resolve(data)
         }).catch((err) => {

@@ -4,7 +4,6 @@ const _api = '_api'
 
 // 登陆请求
 export function login(data) {
-  console.log(data)
   return axios.request({
     url: `/${_api}/login`,
     method: 'POST',

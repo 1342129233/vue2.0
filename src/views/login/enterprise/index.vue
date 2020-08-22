@@ -10,7 +10,7 @@
         <el-card shadow="always" class="search-card">
           <el-input v-model="enterpriseName" placeholder="企业名称"></el-input>
           <el-button id="search" @click="getCompanylist(enterpriseName)">搜索</el-button>
-          <div class="enterprise-header clearfix wxyou">
+          <div class="enterprise-header clearfix wxyou" v-if="isAdmin">
             <el-button type="success" class="add-enterprise"
             @click="()=>this.$router.push({path: '/addenterprise', query: { pid: 0, tit: 'addBusiness', eid: 0 }})">添加企业</el-button>
           </div>
@@ -59,11 +59,13 @@
 </template>
 <script>
 import { mapActions, mapState } from 'vuex'
+import { loadFromLocal } from '@/common/local-storage'
 export default {
   name: 'enterprise',
   data() {
     return {
-      enterpriseName: ''
+      enterpriseName: '',
+      isAdmin: loadFromLocal('is_admin')
       // companyList: [],
       // company_sum_count: 0
     }

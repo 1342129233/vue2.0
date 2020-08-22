@@ -97,8 +97,8 @@
         </el-table>
         <el-pagination v-show="tabRadioCurrentValue === 'person'" :current-page.sync="personParams.page" background layout="prev, pager, next" :total="total-0" hide-on-single-page @current-change="personCurrentChange"></el-pagination>
         <el-row>
-            <el-button v-show="tabRadioCurrentValue === 'pro'" type="text" class="text-btn" @click="getProId(newProfession)">全选</el-button>
-            <el-button v-show="tabRadioCurrentValue === 'occ'" type="text" class="text-btn" @click="getOccId(newOccupation)">全选</el-button>
+            <el-button v-show="tabRadioCurrentValue === 'pro'" type="text" class="text-btn" @click="getProId(newProfession)">全选 / 取消</el-button>
+            <el-button v-show="tabRadioCurrentValue === 'occ'" type="text" class="text-btn" @click="getOccId(newOccupation)">全选 / 取消</el-button>
           </el-row>
         <el-button v-show="tabRadioCurrentValue === 'pro'" size='mini' :class="proCheckedId.includes(item.cid)?'default-btn marTRB5 default-btn-active':'default-btn marTRB5'" v-for="item in newProfession" :key="item.id" @click="proIsChecked(item)">{{item.name}}</el-button>
         <el-button v-show="tabRadioCurrentValue === 'occ'" size='mini' :class="occCheckedId.includes(item.cid)?'default-btn marTRB5 default-btn-active':'default-btn marTRB5'" v-for="item in newOccupation" :key="item.id" @click="occIsChecked(item)">{{item.name}}</el-button>

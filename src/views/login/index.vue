@@ -115,9 +115,13 @@
             }
             this.login(userInfo).then(res=>{
               if(res.code === 0){
+                console.log(1)
+                // this.store.commit('SET_LOADING', false)
                 // this.loading = false;
                 this.$refs.loginForm.resetFields();
                 this.$router.push(res.data.user.multi_enterprise?'/enterprise':{path: '/home', query: {eid: res.data.user.manage_eid}})
+              }else{
+
               }
             })
           } else {
