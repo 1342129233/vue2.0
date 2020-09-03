@@ -55,6 +55,12 @@ const home = [
         name: 'rotation',
         component: () => import('@/views/rotation'),
         meta: {title: '轮播图', icon: 'camera-solid'}
+      },
+      {
+        path: 'planstatistics',
+        name: 'planstatistics',
+        component: () => import('@/views/planstatistics/index'),
+        meta: {title: '计划统计列表', icon: 'camera-solid'}
       }
     ]
   }

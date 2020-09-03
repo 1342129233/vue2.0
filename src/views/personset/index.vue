@@ -103,7 +103,7 @@
       </div>
     </div>
     <!-- 添加人员 -->
-    <el-dialog :title="dialogTit" :visible.sync="dialogFormVisible">
+    <el-dialog :title="dialogTit" :visible.sync="dialogFormVisible" v-if="update">
       <el-form :model="personCre">
         <el-form-item label="用户名" label-width="120px">
           <el-input v-model="personCre.nickname" :style="{width: '400px'}" class='input-focus'></el-input>
@@ -130,7 +130,7 @@
           <el-input v-model="personCre.batch_tag" :style="{width: '400px'}" class='input-focus'></el-input>
         </el-form-item>
         <el-form-item label='部门选择' label-width="120px">
-          <el-cascader :options="yyglbgg_did" :show-all-levels="false" v-model="personCre.did" :props="{ value: 'id', label: 'name'}"></el-cascader>
+          <el-cascader clearable :options="yyglbgg_did" :show-all-levels="false" v-model="personCre.did" :props="{ value: 'id', label: 'name'}" @change="handleChange(personCre.did)"></el-cascader>
         </el-form-item>
         <el-form-item label="工种选择" label-width="120px">
           <el-select v-model="personCre.gid"
@@ -197,7 +197,7 @@
         list-type="picture"
          name="excel">
         <el-button size="small" type="primary">点击上传</el-button>
-        <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+        <div slot="tip" class="el-upload__tip">导入文件大小不超过500kb</div>
       </el-upload>
       <span slot="footer" class="dialog-footer">
         <el-button @click="ImportEmployees = false">取 消</el-button>
@@ -243,6 +243,7 @@
       :FoccCheckedId="occCheckedId"
       @closeDeptproocc="closeDeptproocc"
       @closeOuterDialog="closeOuterDialog"
+      @ggshua="ggshua"
       :tabRadio="['dept','pro','occ']"
       ></Deptworkjobper>
     <Deptpost
@@ -269,6 +270,7 @@ export default {
   },
   data() {
     return {
+      update: false, // 添加人员组件
       // 分配岗位组
       deptpostVisible: false,
       // 上传文件
@@ -344,6 +346,13 @@ export default {
       this.tableData = data
       this.showis = true
     },
+    // 刷新
+    ggshua() {
+      this.setEmployeelist().then(({data}) => {
+        this.total = +data.total
+        this.newdepartmentList = data.data
+      })
+    },
     // 时间戳转换
     formatDate(row) {
       let tim = Number(row.createdTime) * 1000
@@ -414,12 +423,12 @@ export default {
       let len = response.data.errorInfo
       if(len.length <= 0) {
         this.ImportStaff(data).then((data) => {
-          this.$message({type: 'success', message: data.data.msg})
+          this.$message({type: 'success', message: '上传成功'})
         })
       }
     },
-    handerrorfile(err) {
-      this.$message({type: 'warning', message: err})
+    handerrorfile() {
+      this.$message({type: 'warning', message: '上传失败'})
     },
     ImportEmployeessuccess() {
       this.ImportEmployees = false
@@ -627,16 +636,23 @@ export default {
           pid: [], // 工种
           gid: []  // 岗位
         }
+        this.update = true
       }
     },
     // 关闭dialog
     iscloseDialog(val) {
       this.dialogFormVisible = false
-      this.ersonCre.did = ''
+      this.personCre.did = ''
+      this.update = false
+    },
+    handleChange(val) {
+      let len = val.length - 1
+      this.personCre.did = val[len]
     },
     closeDialog(val) {
       if(this.verification()) {
-        this.personCre.did = this.personCre.did[0]
+        // console.log(this.personCre.did)
+        // this.personCre.did = this.personCre.did[0]
         this.addStaff(this.personCre).then((data) => {
           if(data.code !== 0) {
             this.$message.error(data.msg)
@@ -657,68 +673,17 @@ export default {
               gid: [],
               idcard: ''
             }
+            this.update = false
           }
           this.setEmployeelist().then(({data}) => {
             this.newdepartmentList = data.data
-            this.ersonCre.did = ''
+            this.personCre.did = ''
           }).catch(() => {
             this.ersonCre.did = ''
             this.dialogFormVisible = false
           })
         })
       }
-      // if(dialogFormVisible) {
-      //   this.addLoading = true
-      //   if(this.isRevise) {
-      //     this.reviseDepartmentInfo(this.departmentInfo).then(({data}) => {
-      //       this.dialogFormVisible = false
-      //       this.addLoading = false
-      //       // 换
-      //       this.setEmployeelist().then(({data}) => {
-      //         this.newdepartmentList = data.data
-      //       })
-      //     }).catch(() => {
-      //       this.dialogFormVisible = false
-      //     })
-      //   }else{
-      //     // 判定是否为空，再次输出密码是不是一样的
-      //     if(this.verification()) {
-      //       this.personCre.did = this.personCre.did[0]
-      //       this.addStaff(this.personCre).then((data) => {
-      //         if(data !== 0) {
-      //           this.$message.error(data.msg)
-      //         }else{
-      //           this.addLoading = false
-      //           this.dialogFormVisible = false
-      //           this.$message.success('添加成功')
-      //           this.personCre = {
-      //             nickname: '',
-      //             password: '',
-      //             password2: '',
-      //             verifiedMobile: '',
-      //             truename: '',
-      //             pinyin: '',
-      //             batch_tag: '',
-      //             did: '',
-      //             pid: [],
-      //             gid: [],
-      //             idcard: ''
-      //           }
-      //         }
-      //         this.setEmployeelist().then(({data}) => {
-      //           this.newdepartmentList = data.data
-      //         })
-      //       }).catch(() => {
-      //         this.dialogFormVisible = false
-      //       })
-      //     } else {
-      //       this.addLoading = false
-      //     }
-      //   }
-      // }else{
-      //   this.dialogFormVisible = dialogFormVisible
-      //   this.addLoading = false
-      // }
     },
     // 筛选
     sift() {
@@ -850,6 +815,7 @@ export default {
     this.setEmployeelist().then(({data}) => {
       this.total = +data.total
       this.newdepartmentList = data.data
+      console.log(this.newdepartmentList)
     })
 
     this.Renbgg().then(({data}) => {

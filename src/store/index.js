@@ -9,6 +9,7 @@ import home from './modules/home'
 import department from './modules/department'
 import workcategory from './modules/workcategory'
 import waiimg from './modules/waiimg'
+import learningplan from './modules/learningplan'
 
 Vue.use(Vuex)
 
@@ -22,6 +23,7 @@ export default new Vuex.Store({
     home,
     department,
     workcategory,
-    waiimg
+    waiimg,
+    learningplan
   }
 })

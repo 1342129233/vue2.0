@@ -6,6 +6,10 @@ import 'element-ui/lib/theme-chalk/index.css'
 
 // animate动画库
 import 'animate.css'
+import 'vx-easyui/dist/themes/default/easyui.css'
+import 'vx-easyui/dist/themes/icon.css'
+import 'vx-easyui/dist/themes/vue.css'
+import EasyUI from 'vx-easyui'
 
 import App from './App'
 import router from './router'
@@ -25,13 +29,18 @@ import './mock'
 
 // vue-json-excel
 import JsonExcel from 'vue-json-excel'
+
+// element-tree-grid
+import ElTreeGrid from 'element-tree-grid'
 Vue.component('downloadExcel', JsonExcel)
+Vue.component(ElTreeGrid)
 
 Vue.use(ElementUI, {
   size: 'medium',
   i18n: (key, value) => i18n.t(key, value)
 })
 Vue.use(Notification)
+Vue.use(EasyUI)
 
 Vue.config.productionTip = false
 

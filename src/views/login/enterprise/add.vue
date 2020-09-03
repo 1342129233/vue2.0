@@ -18,7 +18,7 @@
             <el-input v-model="addEnterpriseFormInfo.mtitle"></el-input>
           </el-form-item>
           <el-form-item label="LOGO" prop='data'>
-            <el-upload 
+            <el-upload
               class='avatar-uploader'
               :multiple='false'
               :action="avatarUploadUrl"
@@ -38,8 +38,8 @@
             </div> -->
           </el-form-item>
           <el-form-item label="区域" prop='areaId'>
-            <el-cascader v-model="addEnterpriseFormInfo.areaId" 
-            :options="PCATreeData" 
+            <el-cascader v-model="addEnterpriseFormInfo.areaId"
+            :options="PCATreeData"
             :props="{value: 'areaId', label: 'areaName', children: '_child'}"
             clearable></el-cascader>
           </el-form-item>
@@ -52,7 +52,7 @@
           <el-form-item label="可用空间（单位：M）" porp='interspace' v-if="!(tit === 'addChildBusiness')">
             <el-input-number v-model="addEnterpriseFormInfo.interspace" controls-position="right" :min="1" :max="1024"></el-input-number>
           </el-form-item>
-          <el-form-item label="到期时间" prop='endTime' v-if="!(tit === 'addChildBusiness')">
+          <el-form-item label="到期时间" prop="endTime" v-if="!(tit === 'addChildBusiness')">
             <el-date-picker
               v-model="addEnterpriseFormInfo.endTime"
               format='yyyy-MM-dd'
@@ -103,9 +103,10 @@ export default {
         callback()
       }
     }
+    // https://up-z1.qiniu.com
     return {
       fileList: [],
-      avatarUploadUrl: 'http://up-z1.qiniu.com',
+      avatarUploadUrl: 'https://upload-z1.qiniup.com',
       QiniuData: {
         key: '',
         token: '',
@@ -171,7 +172,14 @@ export default {
     // 上传企业logo之前
     beforeUpload(file) {
       this.QiniuData.data = file
-      this.QiniuData.key = `${Math.round(new Date() / 1000) + file.name}`
+      // 、随机数
+      let timestamp = (new Date()).valueOf()
+      let suiji = ''
+      for(let i = 0; i < 10; i++) {
+        suiji = suiji + Math.ceil(Math.random() * 10)
+      }
+      // this.QiniuData.key = `${Math.round(new Date() / 1000) + file.name}`
+      this.QiniuData.key = `${timestamp}${suiji}${file.name}`
     },
     // 成功上传企业logo
     successUpload({fkey}) {
@@ -192,6 +200,7 @@ export default {
           if(this.tit === 'editBusiness') {
             this.postEnterprise(this.addEnterpriseFormInfo)
           }else{
+            console.log(this.addEnterpriseFormInfo)
             this.addEnterpriseRes(this.addEnterpriseFormInfo).then(({data}) => {
               if(data.code) {
                 this.getCompanylist('')
@@ -224,7 +233,7 @@ export default {
         this.addEnterpriseFormInfo.pid = newEid.query.pid
         this.tit = newEid.query.tit
         this.getEnterprise(this.addEnterpriseFormInfo.eid).then(({data}) => {
-          this.addEnterpriseFormInfo = data.company
+          // this.addEnterpriseFormInfo = data.company
           this.addEnterpriseFormInfo.areaId = [data.company.areaId1, data.company.areaId2, data.company.areaId3]
           this.addEnterpriseFormInfo.data = data.company.logo
           this.imageUrl = ''
@@ -246,7 +255,7 @@ export default {
   .add-content
     width 50%
     margin 0 auto
-    .el-form 
+    .el-form
       display grid
       .el-radio-group
        margin 0 auto 20px

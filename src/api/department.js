@@ -61,7 +61,8 @@ export function addStaffRequest(data) {
 // 导出员工列表
 export function ExportEmployeeRequest() {
   // let data = num
-  window.location.href = 'https://dev2.hse365.cc/_api/admin/person/list?export=' + 'y' + '&token=' + getToken()
+  // window.location.href = `/${_api}/_api/admin/person/list?export=' + 'y' + '&token=' + getToken()
+  window.location.href = `/${_api}/_api/` + 'admin/person/list?export=' + 'y' + '&token=' + getToken()
   // return axios.request({
   //   url: `/${_api}/admin/person/list`,
   //   method: 'POST',

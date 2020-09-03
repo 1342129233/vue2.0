@@ -115,7 +115,7 @@
             }
             this.login(userInfo).then(res=>{
               if(res.code === 0){
-                console.log(1)
+                console.log(res)
                 // this.store.commit('SET_LOADING', false)
                 // this.loading = false;
                 this.$refs.loginForm.resetFields();

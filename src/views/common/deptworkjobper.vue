@@ -68,26 +68,29 @@
       <!-- 工种content -->
       <el-tabs type="border-card" class="tab-color" v-show="tabRadioCurrentValue === 'pro'">
         <el-row>
-          <el-button type="text" class="text-btn marL10" @click="ispidcontent">取消全选</el-button>
-          <el-button type="text" class="text-btn" @click="pidcontent">全选</el-button>
+          <el-button type="text" class="text-btn marL10" @click="isgidcontent">取消全选</el-button>
+          <el-button type="text" class="text-btn" @click="gidcontentgz">全选</el-button>
         </el-row>
         <!-- 数据 -->
-        <!-- <el-badge v-for="item in items.children" :key="item.id" :value="0" :max="99" class="item">
-          <el-button size='mini' :class="deptCheckedId.includes(item.id)?'default-btn default-btn-active':'default-btn'" @click="deptIsChecked(item)">{{item.name}}</el-button>
-        </el-badge> -->
+        <!-- <span v-for="item in newOccupation" :key="item.id" >
+          <el-button style="margin: 5px" :type="tableData.gidArrs.indexOf(item.cid) != -1?'danger':''" @click="occClick(item.cid)">{{item.name}}</el-button>
+        </span> -->
         <span v-for="item in newProfession" :key="item.id" >
-          <el-button style="margin: 5px" :type="tableData.pidArrs.indexOf(item.cid) != -1?'danger':''" @click="proClick(item.cid)">{{item.name}}</el-button>
+          <el-button style="margin: 5px" :type="tableData.gidArrs.indexOf(item.cid) != -1?'danger':''" @click="occClick(item.cid)">{{item.name}}</el-button>
         </span>
       </el-tabs>
       <!-- 岗位content -->
       <el-tabs type="border-card" class="tab-color" v-show="tabRadioCurrentValue === 'occ'">
         <el-row>
-          <el-button type="text" class="text-btn marL10" @click="isgidcontent">取消全选</el-button>
-          <el-button type="text" class="text-btn" @click="gidcontent">全选</el-button>
+          <el-button type="text" class="text-btn marL10" @click="ispidcontent">取消全选</el-button>
+          <el-button type="text" class="text-btn" @click="pidcontent">全选</el-button>
         </el-row>
         <!-- 数据 -->
+        <!-- <span v-for="item in newProfession" :key="item.id" >
+          <el-button style="margin: 5px" :type="tableData.pidArrs.indexOf(item.cid) != -1?'danger':''" @click="proClick(item.cid)">{{item.name}}</el-button>
+        </span> -->
         <span v-for="item in newOccupation" :key="item.id" >
-          <el-button style="margin: 5px" :type="tableData.gidArrs.indexOf(item.cid) != -1?'danger':''" @click="occClick(item.cid)">{{item.name}}</el-button>
+          <el-button style="margin: 5px" :type="tableData.pidArrs.indexOf(item.cid) != -1?'danger':''" @click="proClick(item.cid)">{{item.name}}</el-button>
         </span>
       </el-tabs>
       <!-- 外部dialog footer -->
@@ -179,8 +182,8 @@ export default {
         {index: '#', text: '#'}
       ],
       PYDefaultValue: '0',
-      newProfession: [], // 新的工种列表
-      newOccupation: [], // 新的岗位列表
+      newProfession: [], // 新的岗位列表
+      newOccupation: [], // 新的工种列表
       selectionList: [],
       PYObj: {
         '0': {arr: ['*'], text: '全部'},
@@ -289,7 +292,7 @@ export default {
     },
     // pid 全选
     pidcontent() {
-      let professionPro = this.newProfession
+      let professionPro = this.newOccupation
       this.tableData.pidArrs = []
       for(let i = 0; i < professionPro.length; i++) {
         this.tableData.pidArrs.push(professionPro[i].cid)
@@ -302,9 +305,10 @@ export default {
       this.tableData.pidArrs = []
       this.tijiao.pid = []
     },
-    // gid 全选
-    gidcontent() {
-      let occupationPro = this.newOccupation
+    // gid 全选 (工种)
+    gidcontentgz() {
+      let occupationPro = this.newProfession
+      console.log(this.tableData)
       this.tableData.gidArrs = []
       for(let i = 0; i < occupationPro.length; i++) {
         this.tableData.gidArrs.push(occupationPro[i].cid)
@@ -322,6 +326,7 @@ export default {
       this.settinging(this.tijiao).then(data => {
         let del = data.data.code
         if(del === 0) {
+          this.$emit('ggshua')
           this.$message({
             message: '恭喜你，修改成功',
             type: 'success'
@@ -462,8 +467,9 @@ export default {
     // 调取部门/工种/岗位列表
     init() {
       this.getDeptProOccList(this.tabRadio).then(({data}) => {
-        this.newProfession = data.profession
-        this.newOccupation = data.occupation
+        // console.log(data.profession)
+        this.newProfession = data.profession  // 工种
+        this.newOccupation = data.occupation  // 岗位
       })
     }
   },

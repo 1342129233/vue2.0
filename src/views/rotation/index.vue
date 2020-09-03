@@ -48,7 +48,7 @@ export default {
       labelPosition: 'right',  // 右对齐
       activeName: '', // 默认选中
       tables: [],
-      domain: 'http://upload-z1.qiniup.com', // 七牛云的上传地址（华南区）
+      domain: 'https://upload-z1.qiniup.com', // 七牛云的上传地址（华南区）
       QiniuData: {
         key: '', // 图片名字处理
         token: '' // 七牛云token
@@ -91,7 +91,13 @@ export default {
         return false
       }
       // return extension && isLt2M
-      this.QiniuData.key = `${file.name}`
+      // 、随机数
+      let timestamp = (new Date()).valueOf()
+      let suiji = ''
+      for(let i = 0; i < 10; i++) {
+        suiji = suiji + Math.ceil(Math.random() * 10)
+      }
+      this.QiniuData.key = `${timestamp}${suiji}${file.name}`
     },
     submitClick(id) {
       const connt = this.tables.filter(item => {

@@ -51,6 +51,7 @@ const user = {
       saveToLocal('name', user.show_name)
       saveToLocal('avatar', user.mediumAvatar)
       saveToLocal('is_admin', user.is_admin)
+      saveToLocal('userId', user.id)
     },
     [SET_MANAGE_EID](state, manageEid) {
       state.manage_eid = manageEid

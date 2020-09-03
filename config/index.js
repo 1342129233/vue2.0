@@ -7,8 +7,8 @@ const path = require('path')
 module.exports = {
   dev: {
     // Paths
-    assetsSubDirectory: 'static',
-    assetsPublicPath: '/',
+    assetsSubDirectory: 'static',  // 除了 index.html 之外的静态资源要存放的路径
+    assetsPublicPath: '/',   // 代表打包后，index.html里面引用资源的的相对地址
     proxyTable: {
       '/_api': {
         target: 'https://dev2.hse365.cc',
@@ -74,8 +74,8 @@ module.exports = {
 
     // Paths
     assetsRoot: path.resolve(__dirname, '../dist'),
-    assetsSubDirectory: 'static',
-    assetsPublicPath: './',
+    assetsSubDirectory: 'static', // 除了 index.html 之外的静态资源要存放的路径
+    assetsPublicPath: './',  // 代表打包后，index.html里面引用资源的的相对地址
     proxyTable: {
       '/_api': {
         target: 'https://dev2.hse365.cc',
