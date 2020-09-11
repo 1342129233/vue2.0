@@ -2,7 +2,7 @@
   <div class="app-wrapper">
     <navbar :sidebarHidden='this.$route.meta.sidebarHidden'></navbar>
     <sidebar v-if='!this.$route.meta.sidebarHidden'></sidebar>
-    <div class="main-container" 
+    <div class="main-container"
     :style="this.$route.meta.sidebarHidden?{padding:'60px 0px 0px',background:'#fff'}:{paddingLeft:'200px'}">
       <!-- <tabs-view></tabs-view> -->
       <app-main></app-main>

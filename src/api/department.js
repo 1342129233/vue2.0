@@ -92,9 +92,14 @@ export function setPostRequest(id) {
 
 // 分配岗位权限提交
 export function setPostdoRequest(jurisdiction) {
+  let ssid = []
+  for(let i = 0; i < jurisdiction.data.length; i++) {
+    ssid.push(jurisdiction.data[i].id)
+  }
   let id = jurisdiction.id
+
   let data = {
-    rolegroupId: jurisdiction.data
+    rolegroupId: ssid
   }
   return axios.request({
     url: `/_api/admin/person/${id}/setPostDo`,

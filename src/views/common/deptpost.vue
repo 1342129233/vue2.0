@@ -9,9 +9,41 @@
         </el-col>
       </el-row>
       <el-tabs type="border-card">
-        <span v-for="item in postNum" :key="item.id">
+        <!-- <span v-for="item in postNum" :key="item.id">
           <el-button style="margin: 5px" :type="tableButton.indexOf(item.id) != -1?'danger':''" @click="deptclick(item.id)">{{item.title}}</el-button>
-        </span>
+        </span> -->
+        <el-table
+          ref="multipleTable"
+          :data="tableDataset.slice((currentPage-1)*pagesize,currentPage*pagesize)"
+          tooltip-effect="dark"
+          style="width: 100%"
+          @selection-change="handleSelectionChange">
+          <el-table-column
+            type="selection"
+          >
+          </el-table-column>
+          <el-table-column
+            prop="title"
+            label="名称"
+          >
+          </el-table-column>
+          <el-table-column
+            prop="name"
+            label="岗位"
+          >
+          </el-table-column>
+          <el-table-column
+            prop="departName"
+            label="作用部门"
+            show-overflow-tooltip>
+          </el-table-column>
+        </el-table>
+        <el-pagination
+          background
+          layout="prev, pager, next"
+          @current-change="handleCurrentChange"
+          :total="total">
+        </el-pagination>
       </el-tabs>
       <!-- 外部dialog footer -->
       <div slot="footer" class="dialog-footer">
@@ -39,7 +71,12 @@ export default {
   data() {
     return {
       postNum: [],
-      tableButton: []
+      tableButton: [],
+      tableDataset: [],
+      multipleSelection: [],
+      currentPage: 1,   // 页数
+      pagesize: 10,  // 每页条数
+      total: 0  // 长度  // rolegroupld
     }
   },
   beforeMount() {
@@ -47,15 +84,24 @@ export default {
   },
   methods: {
     ...mapActions(['setPostStaff', 'setPostdoStaff']),
+    handleCurrentChange(val) {
+      this.currentPage = val
+      // console.log(`当前页: ${val}`);
+    },
+    handleSelectionChange(val) {
+      this.multipleSelection = val
+    },
     setPostdeptzi() {
       this.$on('setPostdept', (res) => {
         this.setPostStaff(res).then(data => {
           if(data.status === 200) {
             let database = data.data.data
-            this.postNum = []
+            this.tableDataset = []
             for(let i = 0; i < database.length; i++) {
-              this.$set(this.postNum, i, database[i])
+              this.$set(this.tableDataset, i, database[i])
             }
+            this.total = this.tableDataset.length
+            // console.log(this.tableDataset)
           }else {
             this.$message({type: 'warning', message: '请求失败'})
           }
@@ -69,7 +115,7 @@ export default {
     postDialog(boo) {
       let jurisdiction = {
         id: this.tableData.id,
-        data: this.tableButton
+        data: this.multipleSelection
       }
       this.setPostdoStaff(jurisdiction).then(data => {
         let dea = data.data
