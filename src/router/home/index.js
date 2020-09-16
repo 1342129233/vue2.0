@@ -61,6 +61,12 @@ const home = [
         name: 'planstatistics',
         component: () => import('@/views/planstatistics/index'),
         meta: {title: '计划统计列表', icon: 'camera-solid'}
+      },
+      {
+        path: 'notice',
+        name: 'notice',
+        component: () => import('@/views/notice/index'),
+        meta: {title: '通知公告', icon: 'camera-solid'}
       }
     ]
   }

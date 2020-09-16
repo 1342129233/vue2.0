@@ -10,8 +10,12 @@
     <!-- 外部dialog -->
     <el-dialog :visible="outerVisible" :show-close="false">
       <!-- 设置模版 -->
-      <!-- <el-row :gutter="53" class="marB20">
-        <el-col :span="18">
+      <el-row :gutter="53" class="marB20">
+        <el-col :span="6">
+          <el-input v-model="mobal.name" placeholder="请输入模板名称"></el-input>
+        </el-col>
+        <!-- Template -->
+        <el-col :span="10">
           <el-select
             v-model="deptWorkJobTemValue"
             filterable
@@ -19,20 +23,22 @@
             placeholder='请选择模版'
             class="select-color"
             popper-class="select-options-color">
-            <el-option key='' label="请选择模版" value=""></el-option>
+            <el-option key='' label="未选中模板" value=""></el-option>
             <el-option
               v-for="item in deptWorkJobTemList"
               :key="item.id"
               :label="item.name"
-              :value="item.value">
+              :value="item.id"
+            >
             </el-option>
           </el-select>
         </el-col>
-        <el-col :span="6">
-          <el-button class="default-btn">保存模版</el-button>
-          <el-button type="danger">删除模版</el-button>
+        <el-col :span="8">
+          <el-button type="success" @click="switchmodel">确定</el-button>
+          <el-button class="default-btn" @click="preservation">保存模版</el-button>
+          <el-button type="danger" @click="delmodel">删除模版</el-button>
         </el-col>
-      </el-row> -->
+      </el-row>
       <!-- 部门/工种/岗位/人员 radio -->
       <el-radio-group v-model="tabRadioCurrentValue" class='marB20 radio-color'>
         <el-radio-button label="dept" v-if="tabRadio.includes('dept')">部门</el-radio-button>
@@ -86,12 +92,76 @@
           <el-button type="text" class="text-btn" @click="pidcontent">全选</el-button>
         </el-row>
         <!-- 数据 -->
-        <!-- <span v-for="item in newProfession" :key="item.id" >
-          <el-button style="margin: 5px" :type="tableData.pidArrs.indexOf(item.cid) != -1?'danger':''" @click="proClick(item.cid)">{{item.name}}</el-button>
-        </span> -->
         <span v-for="item in newOccupation" :key="item.id" >
           <el-button style="margin: 5px" :type="tableData.pidArrs.indexOf(item.cid) != -1?'danger':''" @click="proClick(item.cid)">{{item.name}}</el-button>
         </span>
+      </el-tabs>
+      <!-- 人员 content -->
+      <el-tabs type="border-card" class="tab-color" v-if="tabRadio.includes('person')" v-show="tabRadioCurrentValue === 'person'">
+        <!-- <el-row>
+          <el-button type="text" class="text-btn marL10" @click="ispidcontent">取消全选</el-button>
+          <el-button type="text" class="text-btn" @click="pidcontent">全选</el-button>
+        </el-row> -->
+        <!-- 数据 -->
+        <!-- <span v-for="item in person" :key="item.id" >
+          <el-button style="margin: 5px" :type="tableData.personArrs.indexOf(item.id) != -1?'danger':''" @click="personClick(item.id)">{{item.truename}}</el-button>
+        </span> -->
+        <el-row class="tablemarg">
+          <el-col :span="6">
+            <el-input v-model="UserLists.keyword" placeholder="请输入姓名/手机号"></el-input>
+          </el-col>
+          <el-col :span="16"></el-col>
+          <el-col :span="2" class="rightTable">
+            <el-button type="success" @click="sousuo">搜索</el-button>
+          </el-col>
+        </el-row>
+        <el-table
+          ref="multipleTable"
+          :data="person"
+          tooltip-effect="dark"
+          style="width: 100%"
+          @selection-change="handleSelectionChange"
+        >
+          <el-table-column
+            type="selection"
+            width="55"
+          >
+          </el-table-column>
+          <el-table-column
+            prop="truename"
+            label="姓名"
+            width="120"
+          >
+            <!-- <template slot-scope="scope">{{ scope.row.date }}</template> -->
+          </el-table-column>
+          <el-table-column
+            prop="dept"
+            label="部门"
+            width="120"
+          >
+          </el-table-column>
+          <el-table-column
+            prop="profession"
+            label="工种"
+            show-overflow-tooltip
+          >
+          </el-table-column>
+          <el-table-column
+            prop="occupation"
+            label="岗位"
+            show-overflow-tooltip
+          >
+          </el-table-column>
+        </el-table>
+        <div
+          v-loading="loading"
+          element-loading-text="拼命加载中"
+          element-loading-spinner="el-icon-loading"
+          class="loadingclass"
+          v-if="loading"
+        >
+        </div>
+        <div v-if="!loading" class="loadingclass" @click="personload">加载更多...</div>
       </el-tabs>
       <!-- 外部dialog footer -->
       <div slot="footer" class="dialog-footer">
@@ -111,15 +181,22 @@ export default {
       type: Boolean,
       default: false
     },
+    pupa: {
+      // 3 是人员关闭权限 4 是 通知公告关闭权限
+      type: Number,
+      default: '0'
+    },
     // show 部门/工种/岗位/人员
     tabRadio: {
       type: Array,
-      default: ['dept', 'pro', 'occ']
+      default: []
     },
     // 传过来点击当前条信息
     tableData: {
       type: Object,
-      default: {}
+      default: () => {
+        return {}
+      }
     }
     // 父组件传过来的deptCheckItem
     // deptCheckItemProp: {
@@ -129,6 +206,17 @@ export default {
   },
   data() {
     return {
+      renyuan: [],
+      // 模板名称
+      mobal: {
+        name: '',
+        part: '',  // 部门
+        profession: [],  // 工种id数组
+        occupation: [],  // 岗位id数组
+        take_user_id: [],  // 用户id数组
+        id: 0
+      },
+      loading: false,
       deptWorkJobTemList: [], // 模版列表
       deptWorkJobTemValue: '', // 选中模版value
       tabRadioCurrentValue: this.tabRadio[1], // 当前tabRadio
@@ -160,6 +248,18 @@ export default {
         //   pid: '-1'
         // }
       ],
+      // 人员
+      person: [
+
+      ],
+      // 人员搜索的分页
+      UserLists: {
+        keyword: '',  // 关键词，可按用户名、手机号、真实姓名搜索
+        page: 1,  // 页码
+        dept_id: '',  // 部门 id
+        profession: '',  // 工种 id
+        occupation: ''  // 岗位 id
+      },
       deptCheckedId: [], // 部门选中id
       // 提交的
       tijiao: {
@@ -168,6 +268,8 @@ export default {
         gid: [],
         pid: []
       },
+      // 提交人员
+      tijiaoper: [],
       PYArr: [
         {index: '0', text: '全部'},
         {index: '1', text: 'AB'},
@@ -246,13 +348,166 @@ export default {
     // }
   },
   methods: {
-    ...mapActions(['getDeptProOccList', 'settinging']),
+    ...mapActions(['getDeptProOccList', 'settinging', 'selectUserListStaff', 'cuStaff', 'delStaff', 'listStaff']),
+    sousuo() {
+      this.UserLists.page = 1
+      this.person = []
+      this.selectUserListStaff(this.UserLists).then(({data}) => {
+        this.person = data.data
+      })
+    },
+    // 删除模板
+    delmodel() {
+      this.delStaff(this.deptWorkJobTemValue).then((data) => {
+        if(data.code === 0) {
+          this.$message({
+            message: '模板删除成功',
+            type: 'success'
+          })
+          this.listStafflist()
+        }else {
+          this.$message.error('模板删除失败')
+        }
+      })
+      // console.log(this.deptWorkJobTemValue)
+    },
+    // 切换模板
+    switchmodel() {
+      if(this.deptWorkJobTemValue === '') {
+        this.empty()
+        this.toggleSelection()
+      }else {
+        this.renyuan = []
+        this.toggleSelection()
+
+        this.deptWorkJobTemList.forEach((item) => {
+          if(item.id === this.deptWorkJobTemValue) {
+            this.empty()
+            if(this.tabRadio.includes('person')) {
+              this.tableData.didId = item.part[0]
+              this.tableData.pidArrs = item.occupation
+              this.tableData.gidArrs = item.profession
+              this.renyuan = item.take_user_id
+            } else {
+              this.tableData.didId = item.part[0]
+              this.tableData.pidArrs = item.occupation
+              this.tableData.gidArrs = item.profession
+              this.tijiao.did = item.part[0]
+              this.tijiao.gid = item.profession
+              this.tijiao.pid = item.occupation
+            }
+          }
+        })
+        if(this.tabRadio.includes('person')) {
+          for(let i = (this.UserLists.page - 1) * 10; i < (this.UserLists.page) * 10; i++) {  // this.person.length
+            if(this.renyuan.includes(this.person[i].id)) {
+              this.toggleSelection([this.person[i]])
+            }
+          }
+        }
+      }
+      this.listStafflist()
+    },
+    // 人员选中
+    toggleSelection(rows) {
+      if(this.tabRadio.includes('person')) {
+        if (rows) {
+          rows.forEach(row => {
+            this.$refs.multipleTable.toggleRowSelection(row)
+          })
+        } else {
+          this.$refs.multipleTable.clearSelection()
+        }
+      }
+    },
+    // 清空方法
+    empty() {
+      this.tableData.didId = ''
+      this.tableData.gidArrs = []
+      this.tableData.pidArrs = []
+      this.tijiaoper = []
+    },
+    // 创建模板
+    preservation() {
+      // this.mobal: {
+      //   name: '',
+      //   part: '',  // 部门
+      //   profession: '',  // 工种id数组
+      //   occupation: '',  // 岗位id数组
+      //   take_user_id: '',  // 用户id数组
+      //   id: ''
+      // }
+      if(this.mobal.name === '') {
+        this.$message({
+          message: '模板名称不能为空',
+          type: 'warning'
+        })
+      }else{
+        this.mobal.part = this.tijiao.did
+        this.mobal.profession = this.tijiao.gid
+        this.mobal.occupation = this.tijiao.pid
+        this.tijiaoper.forEach((item) => {
+          this.mobal.take_user_id.push(item.id)
+        })
+        this.cuStaff(this.mobal).then((data) => {
+          if(data.code === 0) {
+            this.$message({
+              message: '保存模板成功',
+              type: 'success'
+            })
+            this.mobal.name = ''
+            this.listStafflist()
+          }
+        })
+      }
+    },
+    // 人员加载更多
+    personload() {
+      this.loading = true
+      this.UserLists.page += 1
+      this.selectUserListStaff(this.UserLists).then(({data}) => {
+        let dbcont = data.data
+        for(let i = 0; i < dbcont.length; i++) {
+          this.person.push(dbcont[i])
+        }
+
+        // this.renyuan = []
+        // this.toggleSelection()
+
+        // this.deptWorkJobTemList.forEach((item) => {
+        //   if(item.id === this.deptWorkJobTemValue) {
+        //     this.empty()
+
+        //     this.tableData.didId = item.part[0]
+        //     this.tableData.pidArrs = item.occupation
+        //     this.tableData.gidArrs = item.profession
+        //     renyuan = item.take_user_id
+        //   }
+        // })
+
+        for(let i = (this.UserLists.page - 1) * 10; i < (this.UserLists.page) * 10; i++) {  // this.person.length
+          if(this.renyuan.includes(this.person[i].id)) {
+            this.toggleSelection([this.person[i]])
+          }
+        }
+
+        this.loading = false
+      })
+    },
+    // 人员选中
+    handleSelectionChange(val) {
+      this.tijiaoper = val
+    },
     // 关闭dialog，点击确定要通过父组件将outerVisible设置为false来关闭，否则不关闭
     closeOuterDialog(boo) {
       let objParams = {
         outerVisible: boo
       }
-      this.$emit('closeOuterDialog', objParams)
+      if(this.pupa === 3) {
+        this.$emit('closeOuterDialog', objParams)
+      }else if (this.pupa === 4) {
+        this.$emit('customoff', objParams)
+      }
     },
     handleSelect(key, keyPath) {
       this.PYDefaultValue = key
@@ -323,18 +578,27 @@ export default {
     },
     // 提交
     handleConfirmUseLayoutBtn() {
-      this.settinging(this.tijiao).then(data => {
-        let del = data.data.code
-        if(del === 0) {
-          this.$emit('ggshua')
-          this.$message({
-            message: '恭喜你，修改成功',
-            type: 'success'
-          })
-        }else{
-          this.$message.error('错了哦，修改失败')
-        }
-      })
+      if(this.pupa === 3) {
+        this.settinging(this.tijiao).then(data => {
+          let del = data.data.code
+          if(del === 0) {
+            this.$emit('ggshua')
+            this.$message({
+              message: '恭喜你，修改成功',
+              type: 'success'
+            })
+          }else{
+            this.$message.error('错了哦，修改失败')
+          }
+        })
+      } else if (this.pupa === 4) {
+        // 通知公告
+        this.tijiaoper.forEach((item) => {
+          this.mobal.take_user_id.push(item.id)
+        })
+        this.tableData.member = this.mobal.take_user_id
+        this.$emit('tsplay', this.tableData)
+      }
     },
     // 部门级别切换
     handleDeptTabsClick(tab, event) {
@@ -446,6 +710,7 @@ export default {
         }
       }
     },
+    // 岗位
     proClick(name) {
       if(this.tableData.pidArrs.includes(name)) {
         let xia = this.tableData.pidArrs.indexOf(name)
@@ -464,14 +729,37 @@ export default {
       }
       this.tijiao.gid = this.tableData.gidArrs
     },
+    personClick(name) {
+      if(this.tableData.personArrs.includes(name)) {
+        let xia = this.tableData.personArrs.indexOf(name)
+        this.tableData.personArrs.splice(xia, 1)
+      }else{
+        this.tableData.personArrs.push(name)
+      }
+      this.tijiao.pid = this.tableData.personArrs
+    },
     // 调取部门/工种/岗位列表
     init() {
       this.getDeptProOccList(this.tabRadio).then(({data}) => {
-        // console.log(data.profession)
+        this.deptTabs[0].children = data.dept // 部门
         this.newProfession = data.profession  // 工种
         this.newOccupation = data.occupation  // 岗位
+        // this.person = data.person
+      })
+      this.selectUserListStaff(this.UserLists).then(({data}) => {
+        this.person = data.data
+      })
+    },
+    // 模板列表及其内容
+    listStafflist() {
+      this.deptWorkJobTemList = []
+
+      this.deptWorkJobTemValue = ''
+      this.listStaff().then(({data}) => {
+        this.deptWorkJobTemList = data
       })
     }
+
   },
   computed: {
     ...mapState({
@@ -488,6 +776,11 @@ export default {
     this.tijiao.did = this.tableData.didId
     this.tijiao.pid = this.tableData.pidArrs
     this.tijiao.gid = this.tableData.gidArrs
+    // 模板列表及其内容
+    this.listStafflist()
+    // this.listStaff().then(({data}) => {
+    //   this.deptWorkJobTemList = data
+    // })
   },
   mounted() {
     this.init()
@@ -495,6 +788,19 @@ export default {
 }
 </script>
 <style lang="stylus" scoped>
+.loadingclass {
+  width:100%;
+  height: 20px;
+  text-align:center;
+  color: #000;
+  margin-top: 20px;
+}
+.tablemarg {
+  margin: 10px 0px;
+}
+.rightTable {
+  float: right;
+}
 .deptworkjobper >>> .el-dialog
   width 1040px
 .deptworkjobper >>> .el-radio-button__inner

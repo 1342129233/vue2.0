@@ -82,7 +82,6 @@ export default {
       if (showingChildren.length === 1) {
         return true
       }
-
       // 如果最终没有任何结果的话，就显示父元素路由
       if (showingChildren.length === 0) {
         this.onlyOneChild = {
@@ -99,9 +98,6 @@ export default {
       // console.log(path.resolve(this.basePath, routePath))
       return path.resolve(this.basePath, routePath)
     }
-  },
-  created() {
-    // console.log(this.basePath)
   }
 }
 </script>

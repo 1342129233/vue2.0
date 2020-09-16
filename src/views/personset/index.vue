@@ -237,6 +237,7 @@
     </el-dialog>
     <Deptworkjobper
       v-if="showis"
+      :pupa="3"
       :tableData="tableData"
       :outerVisible="outerVisible"
       :FproCheckedId="proCheckedId"

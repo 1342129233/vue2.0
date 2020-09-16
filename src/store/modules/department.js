@@ -1,4 +1,4 @@
-import {getDepartmentListRequest, addDepartmentRequest, reviseDepartmentInfoRequest, deleteDepartmentRequest, setProOccRequest, setEmployeelistRequest, addStaffRequest, ExportEmployeeRequest, ImportStaffRequest, setPostRequest, setPostdoRequest, deptmoveRequest} from '@/api/department'
+import {getDepartmentListRequest, addDepartmentRequest, reviseDepartmentInfoRequest, deleteDepartmentRequest, setProOccRequest, setEmployeelistRequest, addStaffRequest, ExportEmployeeRequest, ImportStaffRequest, setPostRequest, setPostdoRequest, deptmoveRequest, selectUserListRequest, cuRequest, delRequest, listRequest} from '@/api/department'
 const department = {
   state: {
     departmentList: [],
@@ -128,6 +128,50 @@ const department = {
       return new Promise((resolve, reject) => {
         setPostdoRequest(jurisdiction).then((data) => {
           return resolve(data)
+        }).catch(err => {
+          return reject(err)
+        })
+      })
+    },
+    // 人员弹框
+    selectUserListStaff(_, data) {
+      return new Promise((resolve, reject) => {
+        selectUserListRequest(data).then(({data}) => {
+          if(data.code === 0) {
+            return resolve(data)
+          }
+        }).catch(err => {
+          return reject(err)
+        })
+      })
+    },
+    // 创建模板
+    cuStaff(_, data) {
+      return new Promise((resolve, reject) => {
+        cuRequest(data).then(({data}) => {
+          resolve(data)
+        }).catch(err => {
+          return reject(err)
+        })
+      })
+    },
+    // 删除模板
+    delStaff(_, data) {
+      return new Promise((resolve, reject) => {
+        delRequest(data).then(({data}) => {
+          resolve(data)
+        }).catch(err => {
+          return reject(err)
+        })
+      })
+    },
+    // 部门工种岗位人员用户选择模板列表
+    listStaff(_, data) {
+      return new Promise((resolve, reject) => {
+        listRequest(data).then(({data}) => {
+          if(data.code === 0) {
+            resolve(data)
+          }
         }).catch(err => {
           return reject(err)
         })

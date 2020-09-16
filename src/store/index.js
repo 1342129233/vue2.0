@@ -10,6 +10,7 @@ import department from './modules/department'
 import workcategory from './modules/workcategory'
 import waiimg from './modules/waiimg'
 import learningplan from './modules/learningplan'
+import notice from './modules/notice'
 
 Vue.use(Vuex)
 
@@ -24,6 +25,7 @@ export default new Vuex.Store({
     department,
     workcategory,
     waiimg,
-    learningplan
+    learningplan,
+    notice
   }
 })

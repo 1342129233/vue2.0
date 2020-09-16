@@ -113,10 +113,42 @@ export function deptmoveRequest(datas) {
   let data = {
     id: datas.id
   }
-  console.log(data)
   return axios.request({
     url: `/_api/admin/department/partmove/${did}`,
     method: 'POST',
     data
+  })
+}
+
+// 人员
+export function selectUserListRequest(data) {
+  return axios.request({
+    url: `/${_api}/baseData/selectUserList?page=${data.page}&keyword=${data.keyword}`,
+    method: 'GET'
+  })
+}
+
+// 创建模板
+export function cuRequest(data) {
+  return axios.request({
+    url: `/${_api}/template/cu`,
+    method: 'POST',
+    data
+  })
+}
+
+// 删除模板
+export function delRequest(data) {
+  return axios.request({
+    url: `/${_api}/template/del?id=${data}`,
+    method: 'GET'
+  })
+}
+
+// 部门工种岗位人员用户选择模板列表
+export function listRequest() {
+  return axios.request({
+    url: `/${_api}/template/list`,
+    method: 'GET'
   })
 }

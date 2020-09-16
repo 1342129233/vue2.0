@@ -89,7 +89,6 @@ const common = {
     getDeptProOccList({ commit }, data) {
       return new Promise((resolve, reject) => {
         getDeptProOccResquest(data).then(({data}) => {
-          console.log(data.data)
           commit('SAVE_DEPTPROOCCLIST', data.data)
           return resolve(data)
         }).catch(err => {
